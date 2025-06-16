@@ -17,12 +17,12 @@ export default function Header() {
   ];
 
   return (
-    <div>
+    <header>
       <div
         className="block bg-primary py-2 d-none d-sm-block text-white fw-bold w-full max-w-screen"
         bis_skin_checked="1"
       >
-        <div className="container mx-auto" bis_skin_checked="1">
+        <div className="max-w-7xl container mx-auto" bis_skin_checked="1">
           <div
             className="row flex items-center justify-between gx-4"
             bis_skin_checked="1"
@@ -42,7 +42,7 @@ export default function Header() {
         </div>
       </div>
       <nav className="block w-full max-w-screen px-4 py-3 mx-auto bg-white bg-opacity-90 sticky top-3 shadow lg:px-8 backdrop-blur-lg backdrop-saturate-150 z-[9999]">
-        <div className="container flex flex-wrap items-center justify-between mx-auto text-slate-800">
+        <div className="container flex flex-wrap items-center justify-between max-w-7xl mx-auto text-slate-800">
           <Link
             href="/"
             className="mr-4 block cursor-pointer py-1.5 text-red-600 font-bold text-2xl"
@@ -148,6 +148,6 @@ export default function Header() {
           </div>
         </div>
       </nav>
-    </div>
+    </header>
   );
 }
