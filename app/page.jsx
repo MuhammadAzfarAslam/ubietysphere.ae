@@ -61,9 +61,10 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Section 2 */}
       <section className="relative bg-primary-light pb-16 pt-30">
         {/* White Overlay */}
-        <div className="absolute inset-0 bg-white opacity-70 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-white opacity-100 pointer-events-none"></div>
         <div className="relative max-w-7xl mx-auto text-center px-2 lg:px-16">
           <p className="text-sm font-medium text-primary mb-2">
             About Ubiety Sphere
