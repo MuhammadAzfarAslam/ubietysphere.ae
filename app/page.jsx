@@ -179,6 +179,64 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* How we work - Section 4 */}
+      <section className="bg-gradient-to-r from-blue-50 to-green-50 py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-sm font-bold text-primary-light mb-2 text-center">
+            How We Work
+          </p>
+          <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
+            Our Working Process
+          </h2>
+          <div className="flex flex-wrap justify-center">
+            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-8">
+              <div className=" text-white bg-green-500 w-[80px] h-[80px] flex items-center justify-center rounded-full mx-auto mb-6">
+                <span className="text-3xl font-semibold">01</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Fill The Form</h3>
+              <p className="text-gray-600">
+                There are many variations of passage of Lorem Ipsum available,
+                but the majority have suffered.
+              </p>
+            </div>
+            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-8">
+              <div className=" text-white bg-blue-500 w-[80px] h-[80px] flex items-center justify-center rounded-full mx-auto mb-6">
+                <span className="text-3xl font-semibold">02</span>
+              </div>
+
+              <h3 className="text-xl font-semibold mb-3">
+                Book an Appointment
+              </h3>
+              <p className="text-gray-600">
+                There are many variations of passage of Lorem Ipsum available,
+                but the majority have suffered.
+              </p>
+            </div>
+            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-8">
+              <div className=" text-white bg-pink-500 w-[80px] h-[80px] flex items-center justify-center rounded-full mx-auto mb-6">
+                <span className="text-3xl font-semibold">03</span>
+              </div>
+
+              <h3 className="text-xl font-semibold mb-3">Check-Ups</h3>
+              <p className="text-gray-600">
+                There are many variations of passage of Lorem Ipsum available,
+                but the majority have suffered.
+              </p>
+            </div>
+            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-8">
+              <div className=" text-white bg-yellow-500 w-[80px] h-[80px] flex items-center justify-center rounded-full mx-auto mb-6">
+                <span className="text-3xl font-semibold">04</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Get Reports</h3>
+              <p className="text-gray-600">
+                There are many variations of passage of Lorem Ipsum available,
+                but the majority have suffered.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
