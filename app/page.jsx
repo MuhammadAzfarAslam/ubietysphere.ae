@@ -1,6 +1,45 @@
 import HomepageBanner from "@/components/banner/HomepageBanner";
 import Image from "next/image";
 
+const services = [
+  {
+    icon: "📚", // Replace with your actual SVG/icon
+    title: "Nutrition counseling",
+    description:
+      "Receive personalized nutrition guidance to create balanced, sustainable eating habits that support your health.",
+  },
+  {
+    icon: "👥", // Replace with your actual SVG/icon
+    title: "Group Coaching Sessions",
+    description:
+      "Receive personalized nutrition guidance to create balanced, sustainable eating habits that support your health.",
+  },
+  {
+    icon: "📝",
+    title: "Meal Planning",
+    description:
+      "Custom meal plans to match your health goals and dietary preferences for long-term results.",
+  },
+  {
+    icon: "🏋️‍♂️",
+    title: "Fitness Coaching",
+    description:
+      "Pair your nutrition with expert fitness coaching for a full-body health transformation.",
+  },
+  {
+    icon: "💬",
+    title: "1:1 Consultations",
+    description:
+      "One-on-one expert sessions tailored to your unique challenges and goals.",
+  },
+  {
+    icon: "📈",
+    title: "Progress Tracking",
+    description:
+      "Track improvements and stay accountable with regular check-ins and progress reports.",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -62,11 +101,11 @@ export default function Home() {
       </div>
 
       {/* Section 2 */}
-      <section className="relative bg-primary-light pb-16 pt-30">
+      <section className="relative bg-primary-light pb-16 lg:pt-36 pt-6">
         {/* White Overlay */}
         <div className="absolute inset-0 bg-white opacity-100 pointer-events-none"></div>
         <div className="relative max-w-7xl mx-auto text-center px-2 lg:px-16">
-          <p className="text-sm font-medium text-primary mb-2">
+          <p className="text-sm font-bold text-primary mb-2">
             About Ubiety Sphere
           </p>
           <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
@@ -81,10 +120,63 @@ export default function Home() {
           </p>
           <a
             href="#"
-            className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-xl shadow hover:bg-primary-dark transition"
+            className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-xl shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition"
           >
-            Learn More About Us
+            <span className="relative z-10 group-hover:text-primary">
+              Learn More About Us
+            </span>
+            <span className="absolute left-0 top-0 w-full h-full bg-secondary transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-in-out"></span>
           </a>
+        </div>
+      </section>
+
+      {/* Services Section 3 */}
+      <section className="services relative bg-primary-light py-16">
+        {/* White Overlay */}
+        <div className="absolute inset-0 bg-white opacity-90 pointer-events-none"></div>
+        <div className="relative max-w-7xl pb-10 mx-auto text-center px-2 lg:px-16">
+          <p className="text-sm font-bold text-primary mb-2">Services</p>
+          <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
+            We provide services for you
+          </h2>
+          <p className="text-base text-gray-700 mb-6 max-w-2xl mx-auto">
+            We offer personalized health coaching services support your wellness
+            journey and empower you to life.
+          </p>
+          {/* <a
+            href="#"
+            className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-xl shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition"
+          >
+            <span className="relative z-10 group-hover:text-primary">
+              All Services
+            </span>
+            <span className="absolute left-0 top-0 w-full h-full bg-secondary transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-in-out"></span>
+          </a> */}
+        </div>
+        <div className="max-w-7xl mx-auto px-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {services.map((item, idx) => (
+            <div
+              key={idx}
+              className="relative group p-6 rounded-2xl  bg-white overflow-hidden transition-all duration-500 shadow hover:shadow-lg"
+            >
+              {/* Hover Overlay */}
+              <div className="absolute inset-0 bg-secondary scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-500 ease-in-out rounded-2xl z-0" />
+
+              {/* Content */}
+              <div className="relative z-10">
+                <div className="mb-4 text-3xl">{item.icon}</div>
+                <h3 className="font-bold text-lg text-black transition-colors duration-300">
+                  {item.title}
+                </h3>
+                <p className="text-gray-500 mt-2 text-sm transition-colors duration-300">
+                  {item.description}
+                </p>
+                <div className="mt-4 font-bold text-primary transition-colors duration-300 inline-flex items-center gap-1">
+                  Read More <span className="text-lg">→</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </>
