@@ -1,4 +1,5 @@
 import HomepageBanner from "@/components/banner/HomepageBanner";
+import FaqItem from "@/components/faq/FaqItem";
 import Image from "next/image";
 
 const services = [
@@ -37,6 +38,29 @@ const services = [
     title: "Progress Tracking",
     description:
       "Track improvements and stay accountable with regular check-ins and progress reports.",
+  },
+];
+
+const faqs = [
+  {
+    question: "What Happens To My Sample Once I Have Provided It?",
+    answer:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod mpor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod mpor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+  },
+  {
+    question: "Where Can I Go To Provide A Sample For Testing?",
+    answer:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod mpor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+  },
+  {
+    question: "What Will Laboratory Testing Cost Me?",
+    answer:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod mpor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+  },
+  {
+    question: "Can I Make Appointments by Phone?",
+    answer:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod mpor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
   },
 ];
 
@@ -234,6 +258,28 @@ export default function Home() {
                 but the majority have suffered.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQs - Section 5 */}
+      <section className="bg-white py-12 px-6 sm:px-10 lg:px-16">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-6">FAQ</h2>
+          <p className="text-xl text-gray-600 mb-12">
+            Care tailored to your unique health needs.{" "}
+            <a href="#" className="text-primary-light hover:underline">
+              Contact us to learn more.
+            </a>
+          </p>
+          <div>
+            {faqs.map((faq, index) => (
+              <FaqItem
+                key={index}
+                question={faq.question}
+                answer={faq.answer}
+              />
+            ))}
           </div>
         </div>
       </section>
