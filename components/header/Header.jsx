@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -47,7 +48,7 @@ export default function Header() {
             href="/"
             className="mr-4 block cursor-pointer py-1.5 text-red-600 font-bold text-2xl"
           >
-            UbietySphere
+            <Image src={'/assets/svg/logo.svg'} width={100} height={50} />
           </Link>
 
           <div className="lg:hidden">
