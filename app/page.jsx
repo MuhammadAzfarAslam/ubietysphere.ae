@@ -74,51 +74,50 @@ export default function Home() {
           <div className="grid w-full grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-2 justify-center items-center">
             {/* Column 1 */}
             <div className="flex flex-col items-center  border-black lg:last:border-r">
-              <div className="text-white text-4xl mb-4">
-                {/* Example Icon (Font Awesome or SVG) */}
+              {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-phone"></i>
-              </div>
-              <h3 className="text-white text-[12px]">Column 1</h3>
+              </div> */}
+              <h3 className="text-white text-[12px] py-4">Second Opinion</h3>
             </div>
 
             {/* Column 2 */}
             <div className="flex flex-col items-center lg:border-l border-black last:border-r">
-              <div className="text-white text-4xl mb-4">
+              {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-envelope"></i>
-              </div>
-              <h3 className="text-white text-[12px]">Column 2</h3>
+              </div> */}
+              <h3 className="text-white text-[12px] py-4">Genetic Counseling</h3>
             </div>
 
             {/* Column 3 */}
             <div className="flex flex-col items-center lg:border-l border-black last:border-r">
-              <div className="text-white text-4xl mb-4">
+              {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-map-marker-alt"></i>
-              </div>
-              <h3 className="text-white text-[12px]">Column 3</h3>
+              </div> */}
+              <h3 className="text-white text-[12px] py-4">Lifestyle Coaching</h3>
             </div>
 
             {/* Column 4 */}
             <div className="flex flex-col items-center lg:border-l border-black last:border-r">
-              <div className="text-white text-4xl mb-4">
+              {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-calendar-alt"></i>
-              </div>
-              <h3 className="text-white text-[12px]">Column 4</h3>
+              </div> */}
+              <h3 className="text-white text-[12px] py-4">Nutrition & Dietetics</h3>
             </div>
 
             {/* Column 5 */}
             <div className="flex flex-col items-center lg:border-l border-black last:border-r">
-              <div className="text-white text-4xl mb-4">
+              {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-comments"></i>
-              </div>
-              <h3 className="text-white text-[12px]">Column 5</h3>
+              </div> */}
+              <h3 className="text-white text-[12px] py-4">Holistic Wellbeing</h3>
             </div>
 
             {/* Column 6 */}
             <div className="flex flex-col items-center lg:border-l border-black ">
-              <div className="text-white text-4xl mb-4">
+              {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-cogs"></i>
-              </div>
-              <h3 className="text-white text-[12px]">Column 6</h3>
+              </div> */}
+              <h3 className="text-white text-[12px] py-4">Women's Health</h3>
             </div>
           </div>
         </div>
