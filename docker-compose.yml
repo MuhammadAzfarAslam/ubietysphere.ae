@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3011-3022:3000"
+
+    networks:
+      - next_app_network
+
+    environment:
+      - NODE_ENV=production
+    
+    mem_limit: 1000m
+    
+networks:
+  next_app_network:
+    driver: bridge
