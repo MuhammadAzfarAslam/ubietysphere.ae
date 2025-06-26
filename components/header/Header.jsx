@@ -131,7 +131,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <nav className="block relative w-full max-w-screen px-4 py-3 mx-auto bg-white bg-opacity-90 sticky top-3 shadow lg:px-8 backdrop-blur-lg backdrop-saturate-150 z-[9990]">
+      <nav className="block relative w-full max-w-screen px-4 py-2 mx-auto bg-white bg-opacity-90 sticky top-3 shadow lg:px-8 backdrop-blur-lg backdrop-saturate-150 z-[9990]">
         <div className="container flex flex-wrap items-center justify-between max-w-7xl mx-auto text-slate-800">
           <Link
             href="/"
