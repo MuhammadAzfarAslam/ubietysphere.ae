@@ -26,8 +26,16 @@ const ExpertDetailPage = () => {
             guidance to support your mental health and well-being.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 pt-12">
-            <TeamCard title="Dr. Jane Doe" designation="Senior Psychologist" />
-            <TeamCard title="Mr. John Smith" designation="Junior Counselor" />
+            <TeamCard
+              title="Dr. Jane Doe"
+              designation="Senior Psychologist"
+              imageURL="/assets/images/team1.jpg"
+            />
+            <TeamCard
+              title="Mr. John Smith"
+              designation="Junior Counselor"
+              imageURL="/assets/images/team1.jpg"
+            />
             <TeamCard title="Dr. Jane Doe" designation="Senior Psychologist" />
             <TeamCard title="Mr. John Smith" designation="Junior Counselor" />
             <TeamCard title="Mr. John Smith" designation="Junior Counselor" />
