@@ -69,7 +69,7 @@ export default function Home() {
     <>
       <HomepageBanner />
       {/* Six Column Section */}
-      <div className="relative z-10 px-6 lg:px-0 py-6 lg:py-0 rounded-2xl">
+      <div className="relative z-999 px-6 lg:px-0 py-6 lg:py-0 rounded-2xl">
         <div className="flex items-center py-16 bg-primary-light max-w-7xl mx-auto px-4 mt-0 lg:mt-[-50px] sm:px-6 lg:px-8 relative lg:absolute inset-0 rounded-xl">
           <div className="grid w-full grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-2 justify-center items-center">
             {/* Column 1 */}
