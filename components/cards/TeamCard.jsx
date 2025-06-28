@@ -10,7 +10,7 @@ const TeamCard = ({
     <div className="flex flex-col items-center text-center ">
       <div className="relative h-60 w-full">
         <Image
-          src={'/assets/images/team1.jpg'}
+          src={'/images/team1.jpg'}
           alt="Dr. Jane Doe"
           fill
           objectFit="cover"
