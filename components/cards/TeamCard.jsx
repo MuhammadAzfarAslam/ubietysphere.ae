@@ -1,5 +1,5 @@
-import Image from "next/image";
 import React from "react";
+import Image from "next/image";
 
 const TeamCard = ({
   imageURL = "/assets/images/team1.jpg",
@@ -10,10 +10,12 @@ const TeamCard = ({
     <div className="flex flex-col items-center text-center ">
       <div className="relative h-60 w-full">
         <Image
-          src={'/images/team1.jpg'}
+          src={'/assets/images/team1.jpg'}
           alt="Dr. Jane Doe"
           fill
           objectFit="cover"
+          width={264}
+          height={240}
           className="rounded-2xl object-top mb-4 shadow"
         />
       </div>
