@@ -10,12 +10,10 @@ const TeamCard = ({
     <div className="flex flex-col items-center text-center ">
       <div className="relative h-60 w-full">
         <Image
-          src={'/assets/images/team1.jpg'}
+          src={`${process.env.NEXT_PUBLIC_URL}${imageURL}`}
           alt="Dr. Jane Doe"
           fill
           objectFit="cover"
-          width={264}
-          height={240}
           className="rounded-2xl object-top mb-4 shadow"
         />
       </div>
