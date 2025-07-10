@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
         className={`${lexendDeca.variable} antialiased`}
       >
         <Header />
-        <main className="flex flex-col min-h-screen">
+        <main className="flex flex-col" style={{ minHeight: 'calc(100vh - 98px)' }}>
         {children}
         </main>
         <Footer />

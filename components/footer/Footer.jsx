@@ -4,9 +4,9 @@ import React from "react";
 
 const ListItem = ({ link = "/", children }) => {
   return (
-    <li class="flex items-center space-x-3 rtl:space-x-reverse">
+    <li className="flex items-center space-x-3 rtl:space-x-reverse">
       <svg
-        class="h-6 text-gray-800 dark:text-white w-1.5"
+        className="h-6 text-gray-800 dark:text-white w-1.5"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -14,9 +14,9 @@ const ListItem = ({ link = "/", children }) => {
       >
         <path
           stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
           d="m1 13 5.7-5.326a.909.909 0 0 0 0-1.348L1 1"
         />
       </svg>
@@ -32,7 +32,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Column A */}
           <div>
-            <Image src={"/assets/svg/logo2.svg"} width={100} height={50} />
+            <Image src={"/assets/svg/logo2.svg"} width={100} height={50} alt="footer logo" />
             <p className="mt-4 text-sm">
               Deleniti aeue corrupti quos dolores quas tias excepturi sint
               occaecati rupiditate non similique sunt incidunt…
@@ -67,7 +67,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold">Contact Info</h3>
             <ul className="mt-4">
-              <li class="flex items-center space-x-3 rtl:space-x-reverse mb-2">
+              <li className="flex items-center space-x-3 rtl:space-x-reverse mb-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -96,7 +96,7 @@ const Footer = () => {
 
                 <span className="text-sm">contact@ubietysphere.ae</span>
               </li>
-              <li class="flex items-center space-x-3 rtl:space-x-reverse mb-2">
+              <li className="flex items-center space-x-3 rtl:space-x-reverse mb-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"

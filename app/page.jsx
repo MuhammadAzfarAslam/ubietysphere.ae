@@ -143,7 +143,7 @@ export default function Home() {
           </p>
           <a
             href="#"
-            className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-xl shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition"
+            className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-sm shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition"
           >
             <span className="relative z-10 group-hover:text-primary">
               Learn More About Us
