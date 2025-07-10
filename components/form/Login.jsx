@@ -3,6 +3,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { postData } from "@/utils/getData";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -20,7 +21,14 @@ const Login = () => {
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
 
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = async (data) => {
+    const response = await postData(
+      `${process.env.NEXT_PUBLIC_API_URL}authenticate`,
+      data
+    );
+    console.log("Login response:", response);
+    
+  };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
       <div>
