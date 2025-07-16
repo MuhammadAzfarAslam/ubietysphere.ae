@@ -24,6 +24,12 @@ const menu = [
   { name: "Contact", href: "/contact" },
 ];
 
+const registerMenu = [
+  { name: "As Parent", href: "/register/parent" },
+  { name: "As Seeker", href: "/register/seeker" },
+  { name: "As Provider", href: "/register/provider" },
+];
+
 const MenuItem = ({ item, onClick }) => {
   const [open, setOpen] = useState(false);
 
@@ -106,25 +112,16 @@ export default function Header() {
                 </button>
 
                 {/* Dropdown Menu (visible on hover) */}
-                <div className="absolute right-0 hidden group-hover:block pb-2.5 bg-white shadow-lg rounded-md mt-0 w-30 z-[9999]">
-                  <Link
-                    href="/login"
-                    className="block text-gray-700 px-4 text-sm pb-1 pt-2 hover:bg-gray-100 rounded-md"
-                  >
-                    As Parent
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="block text-gray-700 px-4 text-sm py-1 hover:bg-gray-100 rounded-md"
-                  >
-                    As Seeker
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="block text-gray-700 px-4 text-sm py-1 hover:bg-gray-100 rounded-md"
-                  >
-                    As Provider
-                  </Link>
+                <div className="absolute right-0 hidden group-hover:block py-2.5 bg-white shadow-lg rounded-md mt-0 w-30 z-[9999]">
+                  {registerMenu.map((item, index) => (
+                    <Link
+                      href={item.href}
+                      key={index}
+                      className="block text-gray-700 px-4 text-sm py-1 hover:bg-gray-100 rounded-md"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
@@ -137,7 +134,12 @@ export default function Header() {
             href="/"
             className="mr-4 block cursor-pointer py-1.5 text-red-600 font-bold text-2xl"
           >
-            <Image src={"/assets/svg/logo.svg"} width={100} height={50} alt="Logo" />
+            <Image
+              src={"/assets/svg/logo.svg"}
+              width={100}
+              height={50}
+              alt="Logo"
+            />
           </Link>
 
           <div className="lg:hidden">
@@ -220,24 +222,15 @@ export default function Header() {
                   >
                     Login
                   </Link>
-                  <Link
-                    href="/login"
-                    className="inline-block text-sm underline font-medium"
-                  >
-                    Register as Parent
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="inline-block text-sm underline font-medium"
-                  >
-                    Register as Seeker
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="inline-block text-sm underline font-medium"
-                  >
-                    Register as Provider
-                  </Link>
+                  {registerMenu.map((item, index) => (
+                    <Link
+                      href={item.href}
+                      key={index}
+                      className="inline-block text-sm underline font-medium"
+                    >
+                      Register {item.name}
+                    </Link>
+                  ))}
                 </li>
               </ul>
             </div>
