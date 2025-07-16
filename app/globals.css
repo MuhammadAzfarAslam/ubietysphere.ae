@@ -29,3 +29,12 @@ body {
   color: var(--foreground);
   font-family: var(--font-lexend), Arial, Helvetica, sans-serif;
 }
+
+.register-form input::placeholder{
+  color: #fff;
+}
+
+/* .register-form input:focus{
+  outline: none !important;
+  border: none !important;
+} */
