@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { postData } from "@/utils/getData";
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -15,6 +17,7 @@ const schema = yup.object({
 });
 
 const Login = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -22,12 +25,18 @@ const Login = () => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
-    const response = await postData(
-      `login`,
-      data
-    );
-    console.log("Login response:", response);
-    
+    const {email, password} = data;
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
+
+    if (res.ok) {
+      router.push("/dashboard"); // redirect after login
+    } else {
+      alert("Invalid credentials");
+    }
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
