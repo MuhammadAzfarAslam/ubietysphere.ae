@@ -23,7 +23,7 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     const response = await postData(
-      `${process.env.NEXT_PUBLIC_API_URL}authenticate`,
+      `login`,
       data
     );
     console.log("Login response:", response);

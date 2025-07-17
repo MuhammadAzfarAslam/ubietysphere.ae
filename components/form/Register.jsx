@@ -21,9 +21,9 @@ const schema = yup.object({
   mobileNumber: yup
     .number()
     .typeError("Mobile number must be a number")
-    .required("Mobile number is required")
-    .min(1000000000, "Mobile number must be at least 10 digits")
-    .max(9999999999, "Mobile number cannot be more than 10 digits"),
+    .required("Mobile number is required"),
+    // .min(1000000000, "Mobile number must be at least 10 digits")
+    // .max(9999999999, "Mobile number cannot be more than 10 digits"),
   password: yup.string().required("Password is required"),
 });
 
@@ -35,9 +35,10 @@ const Register = ({ role }) => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
+    const formattedDate = new Date(data.dateOfBirth).toISOString().split('T')[0];
     const response = await postData(
-      `user/signup`,
-      { ...data, role } // Pass role from props
+      `api/user/signup`,
+      { ...data, dateOfBirth: formattedDate, role } // Pass role from props
     );
     console.log("Register response:", response);
   };
