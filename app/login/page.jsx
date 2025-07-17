@@ -1,7 +1,17 @@
-import Login from "@/components/form/Login";
 import React from "react";
+import Login from "@/components/form/Login";
+import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await getServerSession(authOptions);
+
+  if (session) {
+    // User is already logged in, redirect (e.g., to dashboard)
+    redirect('/dashboard');
+  }
+
   return (
     <div className="bg-secondary lg:py-8 relative lg:h-[calc(100vh-100px)]">
       <div className="absolute inset-0 bg-white opacity-90 pointer-events-none"></div>

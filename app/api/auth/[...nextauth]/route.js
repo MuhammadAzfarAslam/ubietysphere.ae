@@ -11,7 +11,9 @@ export const authOptions = {
       },
       async authorize(credentials) {
         // Call your real backend login API
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+        console.log("credentials", credentials);
+        
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -21,7 +23,9 @@ export const authOptions = {
         });
 
         const user = await res.json();
-
+        console.log("res inside route", res);
+        console.log("user inside route", user);
+        
         if (res.ok && user) {
           return {
             id: user.id,
