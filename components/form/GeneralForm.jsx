@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { postData } from "@/utils/getData";
+import FormButton from "../button/FormButton";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -27,7 +28,7 @@ const schema = yup.object({
   password: yup.string().required("Password is required"),
 });
 
-const Register = ({ role }) => {
+const GeneralForm = ({ role }) => {
   const {
     register,
     handleSubmit,
@@ -173,39 +174,12 @@ const Register = ({ role }) => {
         </div>
       </div>
 
-      <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-white"
-        >
-          Password
-        </label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Enter your password"
-          className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
-          {...register("password")}
-        />
-        <p className="text-red-500 text-sm">
-          {errors.password && errors.password.message}
-        </p>
-      </div>
 
       <div>
-        <button
-          type="submit"
-          className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-sm shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition w-full text-center"
-        >
-          <span className="relative z-10 group-hover:text-primary">
-            Register
-          </span>
-          <span className="absolute left-0 top-0 w-full h-full bg-secondary transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-in-out"></span>
-        </button>
+        <FormButton additionalClass={'w-full'}>Update</FormButton>
       </div>
     </form>
   );
 };
 
-export default Register;
+export default GeneralForm;
