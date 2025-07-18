@@ -6,10 +6,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 const sideMenu = [
-  { name: "General Info", href: "#", role: ["Doctor", "Patient", "Parent"] },
-  { name: "Education", href: "#", role: ["Doctor"] },
-  { name: "Experience", href: "#", role: ["Doctor"] },
-  { name: "Documents", href: "#", role: ["Doctor", "Patient", "Parent"] },
+  { name: "General Info", href: "/dashboard", role: ["Doctor", "Patient", "Parent"] },
+  { name: "Education", href: "/dashboard/education", role: ["Doctor"] },
+  { name: "Experience", href: "/dashboard/experience", role: ["Doctor"] },
+  { name: "Documents", href: "/dashboard/documents", role: ["Doctor", "Patient", "Parent"] },
 ];
 
 const DashboardLayout = async ({ params, children }) => {
