@@ -6,9 +6,10 @@ const Logout = () => {
   return (
     <button
       onClick={() => signOut({ callbackUrl: "/login" })}
-      className="bg-red-500 text-white px-4 py-2 rounded"
+      className="inline-block lg:px-6 px-3 lg:py-3 py-1 bg-red-500 text-white font-medium rounded-sm shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition lg:mt-0 mt-2"
     >
-      Logout
+      <span className="relative z-10 group-hover:text-primary">Logout</span>
+      <span className="absolute left-0 top-0 w-full h-full bg-secondary transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-in-out"></span>
     </button>
   );
 };
