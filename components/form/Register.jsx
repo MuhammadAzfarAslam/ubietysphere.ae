@@ -159,7 +159,7 @@ const Register = ({ role }) => {
           <select
             id="gender"
             name="gender"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary"
             {...register("gender")}
           >
             <option value="">Select Gender</option>
