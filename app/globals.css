@@ -31,6 +31,7 @@ body {
 }
 
 .register-form input::placeholder,
+.reset-form input::placeholder,
 .forgot-form input::placeholder {
   color: #fff;
 }
