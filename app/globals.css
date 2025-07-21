@@ -30,7 +30,8 @@ body {
   font-family: var(--font-lexend), Arial, Helvetica, sans-serif;
 }
 
-.register-form input::placeholder{
+.register-form input::placeholder,
+.forgot-form input::placeholder {
   color: #fff;
 }
 

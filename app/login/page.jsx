@@ -3,6 +3,7 @@ import Login from "@/components/form/Login";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
+import Link from "next/link";
 
 export default async function LoginPage() {
   const session = await getServerSession(authOptions);
@@ -33,9 +34,9 @@ export default async function LoginPage() {
             <Login />
 
             <div className="mt-4 text-center">
-              <a href="#" className="text-sm text-primary hover:text-blue-800">
+              <Link href="/forgot-password" className="text-sm text-primary hover:text-blue-800">
                 Forgot password?
-              </a>
+              </Link>
             </div>
           </div>
         </div>
