@@ -23,20 +23,32 @@ const schema = yup.object({
     .number()
     .typeError("Mobile number must be a number")
     .required("Mobile number is required"),
-    // .min(1000000000, "Mobile number must be at least 10 digits")
-    // .max(9999999999, "Mobile number cannot be more than 10 digits"),
+  // .min(1000000000, "Mobile number must be at least 10 digits")
+  // .max(9999999999, "Mobile number cannot be more than 10 digits"),
   password: yup.string().required("Password is required"),
 });
 
-const GeneralForm = ({ role }) => {
+const GeneralForm = ({ data }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: yupResolver(schema) });
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      firstName: data?.firstName || "",
+      lastName: data?.lastName || "",
+      email: data?.email || "",
+      mobileNumber: data?.mobileNumber || "",
+      dateOfBirth: data?.dateOfBirth ? data.dateOfBirth.split("T")[0] : "", // format if it's an ISO string
+      gender: data?.gender || "",
+    },
+  });
 
   const onSubmit = async (data) => {
-    const formattedDate = new Date(data.dateOfBirth).toISOString().split('T')[0];
+    const formattedDate = new Date(data.dateOfBirth)
+      .toISOString()
+      .split("T")[0];
     const response = await postData(
       `user/signup`,
       { ...data, dateOfBirth: formattedDate, role } // Pass role from props
@@ -50,7 +62,7 @@ const GeneralForm = ({ role }) => {
         <div>
           <label
             htmlFor="firstName"
-            className="block text-sm font-medium text-white"
+            className="block text-sm font-medium text-light"
           >
             First Name
           </label>
@@ -59,7 +71,7 @@ const GeneralForm = ({ role }) => {
             id="firstName"
             name="firstName"
             placeholder="First Name"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary placeholder-white text-white"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary placeholder-primary-light text-primary-light"
             {...register("firstName")}
           />
           <p className="text-red-500 text-sm">
@@ -70,7 +82,7 @@ const GeneralForm = ({ role }) => {
         <div>
           <label
             htmlFor="lastName"
-            className="block text-sm font-medium text-white"
+            className="block text-sm font-medium text-light"
           >
             Last Name
           </label>
@@ -79,7 +91,7 @@ const GeneralForm = ({ role }) => {
             id="lastName"
             name="lastName"
             placeholder="Last Name"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
             {...register("lastName")}
           />
           <p className="text-red-500 text-sm">
@@ -92,7 +104,7 @@ const GeneralForm = ({ role }) => {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-white"
+            className="block text-sm font-medium text-light"
           >
             Email Address
           </label>
@@ -101,7 +113,7 @@ const GeneralForm = ({ role }) => {
             id="email"
             name="email"
             placeholder="you@example.com"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
             {...register("email")}
           />
           <p className="text-red-500 text-sm">
@@ -112,7 +124,7 @@ const GeneralForm = ({ role }) => {
         <div>
           <label
             htmlFor="mobileNumber"
-            className="block text-sm font-medium text-white"
+            className="block text-sm font-medium text-light"
           >
             Mobile Number
           </label>
@@ -121,7 +133,7 @@ const GeneralForm = ({ role }) => {
             id="mobileNumber"
             name="mobileNumber"
             placeholder="Enter mobile number"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
             {...register("mobileNumber")}
           />
           <p className="text-red-500 text-sm">
@@ -134,7 +146,7 @@ const GeneralForm = ({ role }) => {
         <div>
           <label
             htmlFor="dateOfBirth"
-            className="block text-sm font-medium text-white"
+            className="block text-sm font-medium text-light"
           >
             Date of Birth
           </label>
@@ -142,7 +154,7 @@ const GeneralForm = ({ role }) => {
             type="date"
             id="dateOfBirth"
             name="dateOfBirth"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
             {...register("dateOfBirth")}
           />
           <p className="text-red-500 text-sm">
@@ -153,14 +165,14 @@ const GeneralForm = ({ role }) => {
         <div>
           <label
             htmlFor="gender"
-            className="block text-sm font-medium text-white"
+            className="block text-sm font-medium text-light"
           >
             Gender
           </label>
           <select
             id="gender"
             name="gender"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
             {...register("gender")}
           >
             <option value="">Select Gender</option>
@@ -174,9 +186,8 @@ const GeneralForm = ({ role }) => {
         </div>
       </div>
 
-
       <div>
-        <FormButton additionalClass={'w-full'}>Update</FormButton>
+        <FormButton additionalClass={"w-full"}>Update</FormButton>
       </div>
     </form>
   );

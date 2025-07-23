@@ -1,7 +1,19 @@
-import FormButton from "@/components/button/FormButton";
 import GeneralForm from "@/components/form/GeneralForm";
+import getData from "@/utils/getData";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 
 export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+
+  const res = await getData(`user/${session?.user?.id}`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+  });
+
+  console.log("res", res);
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
@@ -16,7 +28,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <GeneralForm />
+      <GeneralForm data={res?.data} />
     </div>
   );
 }
