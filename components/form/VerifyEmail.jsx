@@ -10,14 +10,15 @@ import Link from "next/link";
 
 // Define validation schema using Yup
 const schema = yup.object({
-  password: yup.string().required("Password is required"), // Required validation
+  email: yup.string().email().required("Email is required"), // Required validation
 });
 
 const VerifyEmail = () => {
   const searchParams = useSearchParams();
-  const [isLoading, setisLoading] = useState(true);
-  const [token, setToken] = useState(null);
+  const [isLoading, setisLoading] = useState(false);
   const [isOkay, setIsOkay] = useState(false);
+  const [isResend, setIsResend] = useState(false);
+  const [token, setToken] = useState(null);
   const {
     register,
     handleSubmit,
@@ -33,8 +34,21 @@ const VerifyEmail = () => {
 
   const verifyCall = async (token) => {
     const res = await getData(`verify-email?token=${token}`);
-    if (res.ok) {
+    console.log("res", res);
+    
+    if (res.status === 200) {
+      setisLoading(false);
       setIsOkay(true);
+    } else {
+      alert("Invalid credentials");
+    }
+  };
+
+  const onSubmit = async (data) => {
+    const { email } = data;
+    const res = await postData(`resend-verification`, { email });
+    if (res.status === 200) {
+      setIsResend(true);
     } else {
       alert("Invalid credentials");
     }
@@ -66,36 +80,73 @@ const VerifyEmail = () => {
 
   if (isOkay) {
     return (
-      <div className="text-center text-secondary">
-        <p className="text-lg">Your email has been verified successfully, please click <Link href={'/login'}>here</Link> to login.</p>
+      <div className="text-center text-primary-light">
+        <div className="tick mb-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className="w-40 h-40 border-8 mx-auto rounded-full bi bi-check text-primary"
+            viewBox="0 0 16 16"
+          >
+            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z" />
+          </svg>
+        </div>
+        <p className="text-lg">
+          Your email has been verified successfully, please click{" "}
+          <Link href={"/login"}>here</Link> to login.
+        </p>
+      </div>
+    );
+  }
+
+  if (isResend) {
+    return (
+      <div className="text-center text-primary-light">
+        <div className="tick mb-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className="w-40 h-40 border-8 mx-auto rounded-full bi bi-check text-primary"
+            viewBox="0 0 16 16"
+          >
+            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z" />
+          </svg>
+        </div>
+        <p className="text-lg">
+          Please check your email for new verification link.
+        </p>
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
+      <p className="text-primary-light mb-3">
+        Your token has been expired, please Resend token.
+      </p>
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-white"
-        >
-          Enter New Password: {token}
+        <label htmlFor="email" className="block text-sm font-medium text-white">
+          Enter Your Email: {token}
         </label>
         <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Enter new password"
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Enter new email"
           className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-2 focus:primary text-white"
-          {...register("password")}
+          {...register("email")}
         />
         <p className="text-red-500 text-sm mb-0">
-          {errors.password && errors.password.message} &nbsp;
+          {errors.email && errors.email.message} &nbsp;
         </p>
       </div>
 
       <div>
-        <FormButton additionalClass={"w-full"}>Reset</FormButton>
+        <FormButton additionalClass={"w-full"}>Send</FormButton>
       </div>
     </form>
   );

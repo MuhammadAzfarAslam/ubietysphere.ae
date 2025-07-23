@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -22,12 +22,13 @@ const schema = yup.object({
     .number()
     .typeError("Mobile number must be a number")
     .required("Mobile number is required"),
-    // .min(1000000000, "Mobile number must be at least 10 digits")
-    // .max(9999999999, "Mobile number cannot be more than 10 digits"),
+  // .min(1000000000, "Mobile number must be at least 10 digits")
+  // .max(9999999999, "Mobile number cannot be more than 10 digits"),
   password: yup.string().required("Password is required"),
 });
 
 const Register = ({ role }) => {
+  const [isOkay, setIsOkay] = useState(false);
   const {
     register,
     handleSubmit,
@@ -35,13 +36,42 @@ const Register = ({ role }) => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
-    const formattedDate = new Date(data.dateOfBirth).toISOString().split('T')[0];
-    const response = await postData(
+    const formattedDate = new Date(data.dateOfBirth)
+      .toISOString()
+      .split("T")[0];
+    const res = await postData(
       `user/signup`,
       { ...data, dateOfBirth: formattedDate, role } // Pass role from props
     );
-    console.log("Register response:", response);
+    if (res.status === 200) {
+      setIsOkay(true);
+    } else {
+      alert("Something went wrong, please try again!");
+    }
   };
+
+  if (isOkay) {
+    return (
+      <div className="text-center text-primary-light">
+        <div className="tick mb-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className="w-40 h-40 border-8 mx-auto rounded-full bi bi-check text-primary"
+            viewBox="0 0 16 16"
+          >
+            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z" />
+          </svg>
+        </div>
+        <p className="text-lg">
+          You have registered successfully, Please check your email for
+          verification link.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 register-form">
