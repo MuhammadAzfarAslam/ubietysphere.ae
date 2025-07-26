@@ -28,7 +28,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <GeneralForm data={res?.data} />
+      <GeneralForm data={res?.data} accessToken={session?.accessToken} />
     </div>
   );
 }

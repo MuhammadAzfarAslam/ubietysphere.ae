@@ -5,30 +5,28 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { postData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
+import NationalitySelect from "./NationalitySelect";
+import CategorySelect from "./CategorySelect";
 
 // Define validation schema using Yup
 const schema = yup.object({
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
-  dateOfBirth: yup
-    .date()
-    .required("Date of birth is required")
-    .max(new Date(), "Date of birth cannot be in the future"),
+  dateOfBirth: yup.date().required("Date of birth is required"),
   gender: yup.string().required("Gender is required"),
-  email: yup
-    .string()
-    .email("Please enter a valid email address")
-    .required("Email is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
   mobileNumber: yup
     .number()
-    .typeError("Mobile number must be a number")
+    .typeError("Must be a number")
     .required("Mobile number is required"),
-  // .min(1000000000, "Mobile number must be at least 10 digits")
-  // .max(9999999999, "Mobile number cannot be more than 10 digits"),
-  password: yup.string().required("Password is required"),
+  address: yup.string(),
+  nationality: yup.string().required("Nationality is required"),
+  // nationalId: yup.number().typeError("Must be a number"),
+  // passportNumber: yup.number().typeError("Must be a number"),
+  category: yup.string().required("Category is required"),
 });
 
-const GeneralForm = ({ data }) => {
+const GeneralForm = ({ data, accessToken }) => {
   const {
     register,
     handleSubmit,
@@ -40,20 +38,54 @@ const GeneralForm = ({ data }) => {
       lastName: data?.lastName || "",
       email: data?.email || "",
       mobileNumber: data?.mobileNumber || "",
-      dateOfBirth: data?.dateOfBirth ? data.dateOfBirth.split("T")[0] : "", // format if it's an ISO string
+      dateOfBirth: data?.dateOfBirth ? data.dateOfBirth.split("T")[0] : "",
       gender: data?.gender || "",
+      address: data?.details?.address || "",
+      nationality: data?.details?.nationality || "",
+      nationalId: data?.details?.nationalId || "",
+      passportNumber: data?.details?.passportNumber || "",
+      category: data?.details?.category || "",
     },
   });
 
-  const onSubmit = async (data) => {
-    const formattedDate = new Date(data.dateOfBirth)
+  const onSubmit = async (formData) => {
+    const formattedDate = new Date(formData.dateOfBirth)
       .toISOString()
       .split("T")[0];
-    const response = await postData(
-      `user/signup`,
-      { ...data, dateOfBirth: formattedDate, role } // Pass role from props
-    );
-    console.log("Register response:", response);
+
+    const payload = {
+      id: data?.id, // original user id
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      dateOfBirth: formattedDate,
+      gender: formData.gender,
+      email: formData.email,
+      mobileNumber: formData.mobileNumber,
+      role: data?.role, // keep same
+      details: {
+        id: data?.id, // original details id
+        address: formData.address,
+        nationality: formData.nationality,
+        nationalId: Number(formData.nationalId),
+        passportNumber: Number(formData.passportNumber),
+        category: formData.category,
+      },
+    };
+
+    console.log("Update payload:", payload);
+
+    try {
+      const response = await postData(`user`, payload, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      console.log("Update response:", response);
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
   };
 
   return (
@@ -98,9 +130,7 @@ const GeneralForm = ({ data }) => {
             {errors.lastName && errors.lastName.message}
           </p>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label
             htmlFor="email"
@@ -140,9 +170,7 @@ const GeneralForm = ({ data }) => {
             {errors.mobileNumber && errors.mobileNumber.message}
           </p>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label
             htmlFor="dateOfBirth"
@@ -183,6 +211,85 @@ const GeneralForm = ({ data }) => {
           <p className="text-red-500 text-sm">
             {errors.gender && errors.gender.message}
           </p>
+        </div>
+
+        <div>
+          <label
+            htmlFor="address"
+            className="block text-sm font-medium text-light"
+          >
+            Address
+          </label>
+          <input
+            type="text"
+            id="address"
+            placeholder="Address"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
+            {...register("address")}
+          />
+          <p className="text-red-500 text-sm">{errors.address?.message}</p>
+        </div>
+        <div>
+          <label
+            htmlFor="nationality"
+            className="block text-sm font-medium text-light"
+          >
+            Nationality
+          </label>
+          <NationalitySelect
+            register={register}
+            defaultValue={data?.details?.nationality || ""}
+          />
+          <p className="text-red-500 text-sm">{errors.nationality?.message}</p>
+        </div>
+
+        <div>
+          <label
+            htmlFor="nationalId"
+            className="block text-sm font-medium text-light"
+          >
+            National ID
+          </label>
+          <input
+            type="text"
+            id="nationalId"
+            placeholder="National ID"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
+            {...register("nationalId")}
+          />
+          <p className="text-red-500 text-sm">{errors.nationalId?.message}</p>
+        </div>
+        <div>
+          <label
+            htmlFor="passportNumber"
+            className="block text-sm font-medium text-light"
+          >
+            Passport Number
+          </label>
+          <input
+            type="text"
+            id="passportNumber"
+            placeholder="Passport Number"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
+            {...register("passportNumber")}
+          />
+          <p className="text-red-500 text-sm">
+            {errors.passportNumber?.message}
+          </p>
+        </div>
+
+        <div>
+          <label
+            htmlFor="category"
+            className="block text-sm font-medium text-light"
+          >
+            Category
+          </label>
+          <CategorySelect
+            register={register}
+            defaultValue={data?.details?.category || ""}
+          />
+          <p className="text-red-500 text-sm">{errors.category?.message}</p>
         </div>
       </div>
 
