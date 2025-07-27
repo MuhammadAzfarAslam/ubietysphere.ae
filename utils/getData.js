@@ -32,8 +32,12 @@ export async function postData(url, body = {}) {
       },
       body: JSON.stringify(body),
     });
+    
+    if (res?.status === 201 || res?.status === 200 || res?.ok) {
+      return res.json();
+    }
 
-    if (!res.ok || res.status !== 200) {
+    if (!res.ok || res.status !== 200 || res.status !== 201) {
       console.error(`API status code response: ${res.status}`);
       console.error(`API did not respond: ${url}`);
 

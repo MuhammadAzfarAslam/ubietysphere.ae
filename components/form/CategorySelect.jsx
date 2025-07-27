@@ -11,16 +11,16 @@ const categories = [
   "Women's Health"
 ];
 
-export default function CategorySelect({ register, defaultValue }) {
+export default function CategorySelect({ register, defaultValue, name= "category" }) {
   return (
     <select
-      id="category"
-      name="category"
+      id={name}
+      name={name}
       defaultValue={defaultValue}
       className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
-      {...register("category")}
+      {...register(name)}
     >
-      <option value="">Select Category</option>
+      <option value="">Select {name}</option>
       {categories.map((cat) => (
         <option key={cat} value={cat}>
           {cat}
