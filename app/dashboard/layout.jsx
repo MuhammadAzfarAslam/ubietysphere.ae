@@ -6,10 +6,18 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 const sideMenu = [
-  { name: "General Info", href: "/dashboard", role: ["Doctor", "Patient", "Parent"] },
+  {
+    name: "General Info",
+    href: "/dashboard",
+    role: ["Doctor", "Patient", "Parent"],
+  },
   { name: "Education", href: "/dashboard/education", role: ["Doctor"] },
   { name: "Experience", href: "/dashboard/experience", role: ["Doctor"] },
-  { name: "Documents", href: "/dashboard/documents", role: ["Doctor", "Patient", "Parent"] },
+  {
+    name: "Documents",
+    href: "/dashboard/documents",
+    role: ["Doctor", "Patient", "Parent"],
+  },
 ];
 
 const DashboardLayout = async ({ params, children }) => {
@@ -28,8 +36,8 @@ const DashboardLayout = async ({ params, children }) => {
     <div className="min-h-screen bg-gray-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:flex lg:space-x-8">
-          <div className="lg:w-1/4 w-full bg-white shadow-md p-4 rounded-lg">
-            <nav className="flex flex-col contents-between h-full">
+          <div className="left-sidebar lg:w-1/4 sticky top-0 p-4 bg-white lg:h-[calc(100vh-160px)] shadow-md rounded-lg">
+            <nav className="flex flex-col h-full ">
               <ul className="lg:space-y-4 space-y-0.5 flex-1">
                 {sideMenu.map(
                   (item) =>
@@ -49,7 +57,7 @@ const DashboardLayout = async ({ params, children }) => {
             </nav>
           </div>
 
-          <div className="lg:flex-1 w-full bg-white shadow-md p-8 rounded-lg mt-3 lg:mt-0">
+          <div className="content lg:flex-1 w-full bg-white shadow-md p-8 rounded-lg mt-3 lg:mt-0">
             {children}
           </div>
         </div>
