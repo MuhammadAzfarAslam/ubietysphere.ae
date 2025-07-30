@@ -24,12 +24,12 @@ const ContactPage = () => {
           <ContactCard
             type="phone"
             title="Phone Number"
-            lines={["+880 1234 567895", "+880 9876 543217"]}
+            lines={["+971527777595", "+971527777595"]}
           />
           <ContactCard
             type="email"
             title="Email Address"
-            lines={["example@gmail.com", "junayedallinone@gmail.com"]}
+            lines={["contact@ubietysphere.ae", "sumedha@sumedhasahni.com"]}
           />
         </div>
       </section>

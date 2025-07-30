@@ -87,7 +87,7 @@ const MenuItem = ({ item, onClick }) => {
   );
 };
 
-export default function Header() {
+export default function Header({ session }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -99,12 +99,21 @@ export default function Header() {
               1010 Avenue, New York, NY 10018 US.
             </div>
             <div className="col-auto flex items-center">
-              <Link
-                href="/login"
-                className="hover:underline text-white text-xs hidden lg:block pr-4 border-r-1"
-              >
-                Login
-              </Link>
+              {session.user.name ? (
+                <Link
+                  href="/dashboard"
+                  className="hover:underline text-white text-xs hidden lg:block pr-4 border-r-1"
+                >
+                  {session?.user?.name}
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hover:underline text-white text-xs hidden lg:block pr-4 border-r-1"
+                >
+                  Login
+                </Link>
+              )}
               <div className="relative group pl-4">
                 {/* Register Button */}
                 <button className="text-white text-xs hidden lg:block cursor-pointer hover:underline">
