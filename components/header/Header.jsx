@@ -99,7 +99,7 @@ export default function Header({ session }) {
               1010 Avenue, New York, NY 10018 US.
             </div>
             <div className="col-auto flex items-center">
-              {session.user.name ? (
+              {session?.user?.name ? (
                 <Link
                   href="/dashboard"
                   className="hover:underline text-white text-xs hidden lg:block pr-4 border-r-1"

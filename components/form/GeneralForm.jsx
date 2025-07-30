@@ -3,7 +3,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { postData } from "@/utils/getData";
+import { putData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
 import NationalitySelect from "./NationalitySelect";
 import CategorySelect from "./CategorySelect";
@@ -64,6 +64,12 @@ const GeneralForm = ({ data, accessToken }) => {
       role: data?.role, // keep same
       details: {
         id: data?.id, // original details id
+        user: {
+          id: data?.id,
+          name: formData.firstName,
+        },
+        middleName1: null,
+        middleName2: null,
         address: formData.address,
         nationality: formData.nationality,
         nationalId: Number(formData.nationalId),
@@ -75,12 +81,8 @@ const GeneralForm = ({ data, accessToken }) => {
     console.log("Update payload:", payload);
 
     try {
-      const response = await postData(`user`, payload, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const response = await putData(`user`, payload, {
+        Authorization: `Bearer ${accessToken}`,
       });
       console.log("Update response:", response);
     } catch (error) {
