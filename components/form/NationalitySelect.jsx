@@ -25,7 +25,7 @@ const countries = [
   "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ];
 
-export default function NationalitySelect({ register, defaultValue }) {
+export default function NationalitySelect({ register, defaultValue, name="Nationality" }) {
   return (
     <select
       id="nationality"
@@ -34,7 +34,7 @@ export default function NationalitySelect({ register, defaultValue }) {
       className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
       {...register("nationality")}
     >
-      <option value="">Select Nationality</option>
+      <option value="">Select {name}</option>
       {countries.map((country) => (
         <option key={country} value={country}>
           {country}
