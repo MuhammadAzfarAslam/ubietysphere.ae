@@ -1,17 +1,13 @@
 import React from 'react'
 
 import EducationHeader from '@/components/header/EducationHeader'
+import EditDeleteList from '@/components/list/EditDeleteList'
+import Education from '@/wrappers/Education'
 
 const EducationPage = () => {
   return (
-    <div className="space-y-6">
-      <EducationHeader />
-
-      {/* <GeneralForm data={res?.data} accessToken={session?.accessToken} /> */}
-
-      <div>
-          <p className="text-gray-500">Qualification 2:</p>
-        </div>
+    <div >
+      <Education />
     </div>
   )
 }
