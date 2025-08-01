@@ -43,7 +43,7 @@ const Register = ({ role }) => {
       `user/signup`,
       { ...data, dateOfBirth: formattedDate, role } // Pass role from props
     );
-    if (res.status === 200) {
+    if (res.status === 201) {
       setIsOkay(true);
     } else {
       alert("Something went wrong, please try again!");
