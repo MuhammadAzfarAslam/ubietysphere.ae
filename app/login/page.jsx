@@ -21,7 +21,7 @@ export default async function LoginPage() {
           <div
             className="lg:w-1/2 w-full lg:bg-cover bg-top-center lg:h-[calc(100vh-170px)] h-[calc(100vh-98px)]"
             style={{
-              backgroundImage: "url(https://ubietysphere.ae/assets/images/asclepius2.jpg)",
+              backgroundImage: "url(https://ubietysphere.ae/assets/images/asclepius2.JPG)",
             }}
           >
             <div className="h-full flex items-center justify-center"></div>
