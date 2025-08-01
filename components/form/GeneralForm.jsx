@@ -7,6 +7,7 @@ import { putData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
 import NationalitySelect from "./NationalitySelect";
 import CategorySelect from "./CategorySelect";
+import { useToast } from "../toaster/ToastContext";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -27,6 +28,7 @@ const schema = yup.object({
 });
 
 const GeneralForm = ({ data, accessToken }) => {
+  const { addToast } = useToast();
   const {
     register,
     handleSubmit,
@@ -63,11 +65,7 @@ const GeneralForm = ({ data, accessToken }) => {
       mobileNumber: formData.mobileNumber,
       role: data?.role, // keep same
       details: {
-        id: data?.id, // original details id
-        user: {
-          id: data?.id,
-          name: formData.firstName,
-        },
+       
         middleName1: null,
         middleName2: null,
         address: formData.address,
@@ -85,8 +83,10 @@ const GeneralForm = ({ data, accessToken }) => {
         Authorization: `Bearer ${accessToken}`,
       });
       console.log("Update response:", response);
+      addToast("Your info has been updated!", "success");
     } catch (error) {
       console.error("Update failed:", error);
+      addToast("Something went wrong!", "error");
     }
   };
 

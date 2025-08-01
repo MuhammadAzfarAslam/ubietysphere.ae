@@ -52,11 +52,32 @@ export const authOptions = {
       if (user) {
         token.accessToken = user.accessToken; // copy to token
         token.role = user.role;
+
+        // Extract 'exp' from the token (JWT token will have the 'exp' claim)
+        const decodedToken = user.accessToken ? JSON.parse(atob(user.accessToken.split('.')[1])) : null;
+        console.log("🔑 Decoded token:", decodedToken);
+        
+        // Store expiration time in token if available
+        if (decodedToken && decodedToken.exp) {
+          token.expiresAt = decodedToken.exp * 1000; // Convert to milliseconds
+        }
+      }
+
+      // Check if the token has expired
+      if (token.expiresAt && Date.now() > token.expiresAt) {
+        return {}; // Expired, return an empty token (logs the user out)
       }
       return token;
     },
     async session({ session, token }) {
       console.log("📦 Session callback - token:", token);
+
+      // Check if the token has expired
+      if (token.expiresAt && Date.now() > token.expiresAt) {
+        return {}; // Expired session, log the user out
+      }
+
+
       session.accessToken = token.accessToken; // expose in session
       session.user.role = token.role; // add role to user object
       session.user.id = token.sub;
