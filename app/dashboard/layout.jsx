@@ -39,7 +39,7 @@ const DashboardLayout = async ({ params, children }) => {
       <div className="min-h-screen bg-gray-100 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:flex lg:space-x-8">
-            <div className="left-sidebar lg:w-1/4 sticky top-0 p-4 bg-white lg:h-[calc(100vh-160px)] shadow-md rounded-lg">
+            <div className="left-sidebar lg:w-1/4 sticky top-0 p-4 bg-white lg:h-[calc(100vh-160px)] lg:min-h-[300px] shadow-md rounded-lg">
               <nav className="flex flex-col h-full ">
                 <ul className="lg:space-y-4 space-y-0.5 flex-1">
                   {sideMenu.map(

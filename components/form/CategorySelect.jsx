@@ -3,12 +3,13 @@ import React from "react";
 
 const categories = [
   "Physician",
-  "Second Opinion",
-  "Genetic Counseling",
-  "Lifestyle Coaching",
-  "Nutrition & Dietetics",
-  "Holistic Wellbeing",
-  "Women's Health"
+  "Nurse",
+  "Optometrist",
+  "Audiometrist",
+  "Physiotherapist",
+  "Psychologist",
+  "Support",
+  "Other"
 ];
 
 export default function CategorySelect({ register, defaultValue, name= "category" }) {

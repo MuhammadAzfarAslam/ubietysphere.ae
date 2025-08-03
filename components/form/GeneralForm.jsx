@@ -47,6 +47,7 @@ const GeneralForm = ({ data, accessToken }) => {
       nationalId: data?.details?.nationalId || "",
       passportNumber: data?.details?.passportNumber || "",
       category: data?.details?.category || "",
+      bio: data?.details?.bio || "",
     },
   });
 
@@ -65,14 +66,14 @@ const GeneralForm = ({ data, accessToken }) => {
       mobileNumber: formData.mobileNumber,
       role: data?.role, // keep same
       details: {
-       
         middleName1: null,
         middleName2: null,
         address: formData.address,
         nationality: formData.nationality,
         nationalId: Number(formData.nationalId),
-        passportNumber: Number(formData.passportNumber),
+        passportNumber: formData.passportNumber,
         category: formData.category,
+        bio: formData.bio,
       },
     };
 
@@ -280,20 +281,37 @@ const GeneralForm = ({ data, accessToken }) => {
           </p>
         </div>
 
-        <div>
-          <label
-            htmlFor="category"
-            className="block text-sm font-medium text-light"
-          >
-            Category
-          </label>
-          <CategorySelect
-            register={register}
-            defaultValue={data?.details?.category || ""}
-          />
-          <p className="text-red-500 text-sm">{errors.category?.message}</p>
-        </div>
+        {data?.role === "Doctor" && (
+          <div>
+            <label
+              htmlFor="category"
+              className="block text-sm font-medium text-light"
+            >
+              Category
+            </label>
+            <CategorySelect
+              register={register}
+              defaultValue={data?.details?.category || ""}
+            />
+            <p className="text-red-500 text-sm">{errors.category?.message}</p>
+          </div>
+        )}
       </div>
+
+      {data?.role === "Doctor" && (
+        <div>
+          <label htmlFor="bio" className="block text-sm font-medium text-light">
+            Add your introduction
+          </label>
+          <textarea
+            name="bio"
+            id="bio"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
+            {...register("bio")}
+          ></textarea>
+          <p className="text-red-500 text-sm">{errors.bio?.message}</p>
+        </div>
+      )}
 
       <div>
         <FormButton additionalClass={"w-full"}>Update</FormButton>
