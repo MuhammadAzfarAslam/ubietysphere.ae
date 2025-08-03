@@ -25,7 +25,7 @@ const Toast = ({ message, type, onClose }) => {
 
   return (
     <div
-      className={`fixed top-5 right-5 max-w-xs w-full p-4 rounded-lg shadow-lg ${getTypeClasses(
+      className={`fixed top-5 right-5 max-w-xs w-full p-4 rounded-lg z-[999] shadow-lg ${getTypeClasses(
         type
       )} transform transition-all duration-300`}
     >
