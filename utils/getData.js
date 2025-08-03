@@ -43,16 +43,26 @@ export default async function getData(url, additional = {}) {
   }
 }
 
-export async function postData(url, body = {}) {
+export async function postData(
+  url,
+  body = {},
+  additionalHeaders = {},
+  type = "POST"
+) {
   try {
     const res = await fetch(`${BASEURL}${url}`, {
-      method: "POST", // Corrected to 'method' instead of 'type'
+      method: type, // Corrected to 'method' instead of 'type'
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        ...additionalHeaders,
       },
       body: JSON.stringify(body),
     });
+
+    if (type === "DELETE" && res?.status === 200) {
+      return;
+    }
 
     if (res?.status === 201 || res?.status === 200 || res?.ok) {
       return res.json();

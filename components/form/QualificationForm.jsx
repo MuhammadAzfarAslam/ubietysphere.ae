@@ -3,15 +3,14 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { putData } from "@/utils/getData";
+import { postData, putData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
 import NationalitySelect from "./NationalitySelect";
-import CategorySelect from "./CategorySelect";
 import DegreeSelect from "./DegreeSelect";
+import { useToast } from "../toaster/ToastContext";
 
 // Define validation schema using Yup
 const schema = yup.object({
-  firstName: yup.string().required("First name is required"),
   instituteName: yup.string().required("Last name is required"),
   fieldOfStudy: yup.string().required("fieldOfStudy is required"),
   country: yup.string().required("Country is required"),
@@ -19,7 +18,14 @@ const schema = yup.object({
   endDate: yup.date().required("End Date is required"),
 });
 
-const QualificationForm = ({ data, accessToken }) => {
+const QualificationForm = ({
+  id,
+  accessToken,
+  data = {},
+  setIsOpen,
+  refreshCall,
+}) => {
+  const { addToast } = useToast();
   const {
     register,
     handleSubmit,
@@ -27,7 +33,7 @@ const QualificationForm = ({ data, accessToken }) => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      firstName: data?.firstName || "",
+      degreeType: data?.degreeType || "",
       instituteName: data?.instituteName || "",
       fieldOfStudy: data?.fieldOfStudy || "",
       country: data?.details?.country || "",
@@ -38,21 +44,28 @@ const QualificationForm = ({ data, accessToken }) => {
   });
 
   const onSubmit = async (formData) => {
-    const formattedDate = new Date(formData.startDate)
-      .toISOString()
-      .split("T")[0];
+    const dateFrom = new Date(formData.startDate).toISOString().split("T")[0];
+    const dateTo = new Date(formData.endDate).toISOString().split("T")[0];
 
     const payload = {
-      id: data?.id, // original user id
+      degreeType: formData?.degreeType,
+      fieldOfStudy: formData?.fieldOfStudy,
+      institutionName: formData?.instituteName,
+      country: formData?.country,
+      dateFrom,
+      dateTo,
     };
 
     console.log("Update payload:", payload);
 
     try {
-      const response = await putData(`user`, payload, {
+      const response = await postData(`user/qualifications`, payload, {
         Authorization: `Bearer ${accessToken}`,
       });
       console.log("Update response:", response);
+      addToast("Record has been Added!", "success");
+      setIsOpen(false);
+      refreshCall();
     } catch (error) {
       console.error("Update failed:", error);
     }
@@ -109,7 +122,6 @@ const QualificationForm = ({ data, accessToken }) => {
           </p>
         </div>
 
-        
         <div>
           <label
             htmlFor="country"
@@ -119,12 +131,11 @@ const QualificationForm = ({ data, accessToken }) => {
           </label>
           <NationalitySelect
             register={register}
-            defaultValue={data?.details?.country || ""}
-            name="Country"
+            defaultValue={data?.country || ""}
+            name="country"
           />
           <p className="text-red-500 text-sm">{errors.country?.message}</p>
         </div>
-
 
         <div>
           <label
@@ -164,11 +175,8 @@ const QualificationForm = ({ data, accessToken }) => {
           </p>
         </div>
 
-
-
-    
         <div>
-          <label
+          {/* <label
             htmlFor="passportNumber"
             className="block text-sm font-medium text-light"
           >
@@ -182,10 +190,8 @@ const QualificationForm = ({ data, accessToken }) => {
           />
           <p className="text-red-500 text-sm">
             {errors.proof?.message}
-          </p>
+          </p> */}
         </div>
-
-      
       </div>
 
       <div>

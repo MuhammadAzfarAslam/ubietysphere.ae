@@ -1,11 +1,11 @@
 import React from "react";
 
-const EditDeleteList = ({title="title"}) => {
+const EditDeleteList = ({ id, title = "title", fieldOfStudy="", deleteHandler }) => {
   return (
     <div className="w-full bg-primary shadow-lg rounded-sm p-3 flex justify-between items-center">
       {/* Left Title */}
       <div className="text-lg  text-white">
-        {title}
+        {fieldOfStudy} - {title}
       </div>
 
       {/* Right Icons */}
@@ -32,7 +32,7 @@ const EditDeleteList = ({title="title"}) => {
             />
           </svg>
         </button>
-        <button className="text-gray-500 hover:text-red-600">
+        <button className="text-gray-500 hover:text-red-600" onClick={()=>deleteHandler(id)}>
           <svg
             width="19"
             height="20"
@@ -43,37 +43,37 @@ const EditDeleteList = ({title="title"}) => {
             <path
               d="M1 3.55859H13"
               stroke="#FF0000"
-              stroke-width="1.1"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
               d="M11.6615 3.55859V12.8919C11.6615 13.5586 10.9948 14.2253 10.3281 14.2253H3.66146C2.99479 14.2253 2.32812 13.5586 2.32812 12.8919V3.55859"
               stroke="#FF0000"
-              stroke-width="1.1"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
               d="M4.33203 3.55729V2.22396C4.33203 1.55729 4.9987 0.890625 5.66536 0.890625H8.33203C8.9987 0.890625 9.66536 1.55729 9.66536 2.22396V3.55729"
               stroke="#FF0000"
-              stroke-width="1.1"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
               d="M5.66797 6.89062V10.8906"
               stroke="#FF0000"
-              stroke-width="1.1"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
               d="M8.33203 6.89062V10.8906"
               stroke="#FF0000"
-              stroke-width="1.1"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         </button>

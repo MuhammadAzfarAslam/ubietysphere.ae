@@ -4,7 +4,7 @@ import GeneralButton from "@/components/button/GeneralButton";
 import Modal from "../modal/Modal";
 import QualificationForm from "../form/QualificationForm";
 
-const EducationHeader = () => {
+const EducationHeader = ({id, accessToken, refreshCall}) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
@@ -23,7 +23,7 @@ const EducationHeader = () => {
         onClose={() => setIsOpen(false)}
         title="Add Qualification"
       >
-        <QualificationForm />
+        <QualificationForm id={id} accessToken={accessToken} setIsOpen={setIsOpen} refreshCall={refreshCall} />
       </Modal>
     </>
   );
