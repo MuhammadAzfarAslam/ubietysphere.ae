@@ -4,8 +4,13 @@ import GeneralButton from "@/components/button/GeneralButton";
 import Modal from "../modal/Modal";
 import QualificationForm from "../form/QualificationForm";
 
-const EducationHeader = ({id, accessToken, refreshCall}) => {
-  const [isOpen, setIsOpen] = useState(false);
+const EducationHeader = ({
+  id,
+  accessToken,
+  refreshCall,
+  defaultState = false,
+}) => {
+  const [isOpen, setIsOpen] = useState(defaultState);
   return (
     <>
       <div className="flex items-center justify-between">
@@ -23,7 +28,12 @@ const EducationHeader = ({id, accessToken, refreshCall}) => {
         onClose={() => setIsOpen(false)}
         title="Add Qualification"
       >
-        <QualificationForm id={id} accessToken={accessToken} setIsOpen={setIsOpen} refreshCall={refreshCall} />
+        <QualificationForm
+          id={id}
+          accessToken={accessToken}
+          setIsOpen={setIsOpen}
+          refreshCall={refreshCall}
+        />
       </Modal>
     </>
   );

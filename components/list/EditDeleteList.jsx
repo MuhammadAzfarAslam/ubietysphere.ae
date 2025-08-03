@@ -10,7 +10,7 @@ const EditDeleteList = ({ id, title = "title", fieldOfStudy="", deleteHandler })
 
       {/* Right Icons */}
       <div className="flex space-x-4">
-        <button className="text-gray-500 hover:text-blue-600">
+        <button className="text-gray-500 cursor-pointer hover:text-blue-600">
           <svg
             width="20"
             height="20"
@@ -32,7 +32,7 @@ const EditDeleteList = ({ id, title = "title", fieldOfStudy="", deleteHandler })
             />
           </svg>
         </button>
-        <button className="text-gray-500 hover:text-red-600" onClick={()=>deleteHandler(id)}>
+        <button className="text-gray-500 cursor-pointer hover:text-red-600" onClick={()=>deleteHandler(id)}>
           <svg
             width="19"
             height="20"

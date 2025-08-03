@@ -20,8 +20,6 @@ const Education = ({ data, id, accessToken }) => {
   };
 
   const deleteHandler = async (id) => {
-    console.log("delete call", id);
-
     try {
       const response = await postData(
         `user/qualifications/${id}`,
@@ -39,6 +37,7 @@ const Education = ({ data, id, accessToken }) => {
       addToast("Something went wrong!", "error");
     }
   };
+  
   return (
     <div className="space-y-6">
       <EducationHeader accessToken={accessToken} id={id} refreshCall={refreshCall} />
