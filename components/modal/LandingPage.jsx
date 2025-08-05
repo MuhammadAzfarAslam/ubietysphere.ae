@@ -81,7 +81,7 @@ const LandingPage = () => {
           <div className="absolute inset-0 bg-[#5ad1ba] bg-opacity-50"></div>{" "}
           {/* Overlay */}
           <h2 className="text-white text-3xl font-semibold z-10 pb-4">
-            Option Health
+            Healthcare
           </h2>
           <GeneralButton
             additionalClass="w-32"
@@ -99,7 +99,7 @@ const LandingPage = () => {
           <div className="absolute inset-0 bg-secondary bg-opacity-50"></div>{" "}
           {/* Overlay */}
           <h2 className="text-black text-3xl font-semibold z-10 pb-4">
-            Option LMS
+            Knowledge Dome LMS
           </h2>
           <GeneralButton
             additionalClass="w-32"
