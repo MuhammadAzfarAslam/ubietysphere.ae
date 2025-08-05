@@ -3,15 +3,15 @@ import Image from "next/image";
 
 const TeamCard = ({
   imageURL = "/assets/images/team1.jpg",
-  title="",
-  designation="",
+  title = "",
+  designation = "",
 }) => {
   return (
     <div className="flex flex-col items-center text-center ">
       <div className="relative h-60 w-full">
         <Image
-          src={`${process.env.NEXT_PUBLIC_URL}${imageURL}`}
-          alt="Dr. Jane Doe"
+          src={imageURL}
+          alt={title}
           fill
           objectFit="cover"
           className="rounded-2xl object-top mb-4 shadow"

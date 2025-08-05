@@ -1,16 +1,28 @@
+import React from "react";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb";
 import TeamCard from "@/components/cards/TeamCard";
-import Image from "next/image";
-import React from "react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import getData from "@/utils/getData";
+import { slugToTitle } from "@/utils/general";
 
-const ExpertDetailPage = () => {
+const ExpertDetailPage = async ({ params }) => {
+  const { slug } = await params;
+  const session = await getServerSession(authOptions);
+
+  const res = await getData(`doctor/by-professions?slug=${slug}`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+  });
+
+  console.log("res expert page", res);
+
   return (
     <>
       <Breadcrumb title="Meet Our Experts">
         <span>/</span>
-        <span className="text-primary-light font-medium">
-          Meet Our Therapists
-        </span>
+        <span className="text-primary-light font-medium capitalize">Our {slugToTitle(slug)}</span>
       </Breadcrumb>
       <section className="relative bg-primary-light py-16">
         {/* White Overlay */}
@@ -26,22 +38,20 @@ const ExpertDetailPage = () => {
             guidance to support your mental health and well-being.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 pt-12">
-            <TeamCard
-              title="Dr. Jane Doe"
-              designation="Senior Psychologist"
-              imageURL="/assets/images/team1.jpg"
-            />
-            <TeamCard
-              title="Mr. John Smith"
-              designation="Junior Counselor"
-              imageURL="/assets/images/team1.jpg"
-            />
-            <TeamCard title="Dr. Jane Doe" designation="Senior Psychologist" />
-            <TeamCard title="Mr. John Smith" designation="Junior Counselor" />
-            <TeamCard title="Mr. John Smith" designation="Junior Counselor" />
-            <TeamCard title="Dr. Jane Doe" designation="Senior Psychologist" />
-            <TeamCard title="Mr. John Smith" designation="Junior Counselor" />
-            <TeamCard title="Dr. Jane Doe" designation="Senior Psychologist" />
+            {res?.data?.content?.map(
+              ({ id, firstName, lastName, imageName }) => (
+                <TeamCard
+                  key={id}
+                  title={`Dr. ${firstName} ${lastName}`}
+                  designation="Senior Psychologist"
+                  imageURL={
+                    imageName !== null
+                      ? `https://cms.ubietysphere.ae/img/user-images/${imageName}`
+                      : "https://ubietysphere.ae/assets/images/placeholder-user.png"
+                  }
+                />
+              )
+            )}
           </div>
         </div>
       </section>

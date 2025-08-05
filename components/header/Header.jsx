@@ -26,6 +26,7 @@ const menu = [
     name: "Our Experts",
     href: "/our-experts",
     children: [
+      { name: "Physician", href: "/our-experts/physician" },
       { name: "Nurse", href: "/our-experts/nurse" },
       { name: "Dentist", href: "/our-experts/dentist" },
       { name: "Optometrist", href: "/our-experts/optometrist" },
