@@ -4,10 +4,13 @@ import React from "react";
 const categories = [
   "Physician",
   "Nurse",
+  "Dentist",
   "Optometrist",
   "Audiometrist",
   "Physiotherapist",
   "Psychologist",
+  "Nutritionist",
+  "Navigator",
   "Support",
   "Other"
 ];
