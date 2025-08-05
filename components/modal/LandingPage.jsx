@@ -20,12 +20,33 @@ const LandingPage = () => {
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
   };
 
+  // Function to remove a cookie
+  const deleteCookie = (name) => {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  };
+
   // Check if the landing page has been shown before
+  //   useEffect(() => {
+  //     const landingPageSeen = getCookie("landingPageSeen");
+  //     if (landingPageSeen) {
+  //       setShowLanding(false); // Hide if cookie exists
+  //     }
+  //   }, []);
+
   useEffect(() => {
-    const landingPageSeen = getCookie("landingPageSeen");
-    if (landingPageSeen) {
-      setShowLanding(false); // Hide if cookie exists
-    }
+    // Listen for the 'beforeunload' event to remove the cookies when the user closes the tab
+    const handleBeforeUnload = () => {
+      deleteCookie("landingPageSeen");
+      deleteCookie("userSelection");
+    };
+
+    // Attach event listener for page unload (close or refresh)
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
   }, []);
 
   // Handle selection and set cookies
@@ -33,9 +54,9 @@ const LandingPage = () => {
     setCookie("landingPageSeen", "true", 1); // Set cookie for 1 day
     setCookie("userSelection", selection, 1); // Store user's selection
     if (selection === "health") {
-    setShowLanding(false); // Close the landing page
+      setShowLanding(false); // Close the landing page
     } else if (selection === "lms") {
-        window.location.href = "https://lms.ubietysphere.ae"; // Redirect to LMS
+      window.location.href = "https://lms.ubietysphere.ae"; // Redirect to LMS
     }
   };
 
@@ -59,8 +80,13 @@ const LandingPage = () => {
         >
           <div className="absolute inset-0 bg-[#5ad1ba] bg-opacity-50"></div>{" "}
           {/* Overlay */}
-          <h2 className="text-white text-3xl font-semibold z-10 pb-4">Option Health</h2>
-          <GeneralButton additionalClass="w-32" onClick={() => handleSelection("health")}>
+          <h2 className="text-white text-3xl font-semibold z-10 pb-4">
+            Option Health
+          </h2>
+          <GeneralButton
+            additionalClass="w-32"
+            onClick={() => handleSelection("health")}
+          >
             Visit
           </GeneralButton>
         </div>
@@ -72,8 +98,13 @@ const LandingPage = () => {
         >
           <div className="absolute inset-0 bg-secondary bg-opacity-50"></div>{" "}
           {/* Overlay */}
-          <h2 className="text-black text-3xl font-semibold z-10 pb-4">Option LMS</h2>
-          <GeneralButton additionalClass="w-32" onClick={() => handleSelection("lms")}>
+          <h2 className="text-black text-3xl font-semibold z-10 pb-4">
+            Option LMS
+          </h2>
+          <GeneralButton
+            additionalClass="w-32"
+            onClick={() => handleSelection("lms")}
+          >
             Visit
           </GeneralButton>
         </div>
