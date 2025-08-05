@@ -1,5 +1,7 @@
 import HomepageBanner from "@/components/banner/HomepageBanner";
 import FaqItem from "@/components/faq/FaqItem";
+import LandingPage from "@/components/modal/LandingPage";
+import { cookies } from "next/headers";
 import Image from "next/image";
 
 const services = [
@@ -65,8 +67,14 @@ const faqs = [
 ];
 
 export default function Home() {
+  const cookieStore = cookies();
+  const landingPageSeen = cookieStore.get('landingPageSeen');
+
+  // If the cookie exists, don't show the LandingPage
+  const showLanding = !landingPageSeen;
   return (
     <>
+      {showLanding && <LandingPage />}
       <HomepageBanner />
       {/* Six Column Section */}
       <div className="relative z-999 px-6 lg:px-0 py-6 lg:py-0 rounded-2xl">
@@ -85,7 +93,9 @@ export default function Home() {
               {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-envelope"></i>
               </div> */}
-              <h3 className="text-white text-[12px] py-4">Genetic Counseling</h3>
+              <h3 className="text-white text-[12px] py-4">
+                Genetic Counseling
+              </h3>
             </div>
 
             {/* Column 3 */}
@@ -93,7 +103,9 @@ export default function Home() {
               {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-map-marker-alt"></i>
               </div> */}
-              <h3 className="text-white text-[12px] py-4">Lifestyle Coaching</h3>
+              <h3 className="text-white text-[12px] py-4">
+                Lifestyle Coaching
+              </h3>
             </div>
 
             {/* Column 4 */}
@@ -101,7 +113,9 @@ export default function Home() {
               {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-calendar-alt"></i>
               </div> */}
-              <h3 className="text-white text-[12px] py-4">Nutrition & Dietetics</h3>
+              <h3 className="text-white text-[12px] py-4">
+                Nutrition & Dietetics
+              </h3>
             </div>
 
             {/* Column 5 */}
@@ -109,7 +123,9 @@ export default function Home() {
               {/* <div className="text-white text-4xl mb-4">
                 <i className="fas fa-comments"></i>
               </div> */}
-              <h3 className="text-white text-[12px] py-4">Holistic Wellbeing</h3>
+              <h3 className="text-white text-[12px] py-4">
+                Holistic Wellbeing
+              </h3>
             </div>
 
             {/* Column 6 */}
