@@ -11,7 +11,7 @@ const ContactPage = () => {
         <span>/</span>
         <span className="text-primary-light font-medium">Contact</span>
       </Breadcrumb>
-      <section className="relative bg-white py-16">
+      <section className="relative bg-white py-16 px-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
           <ContactCard
             type="address"
@@ -34,7 +34,7 @@ const ContactPage = () => {
         </div>
       </section>
 
-      <section className="contact-form relative bg-white pb-16">
+      <section className="contact-form relative bg-white pb-16 px-3">
         <div className="flex flex-col md:flex-row items-center gap-8 max-w-7xl mx-auto">
           <div className="w-full md:w-2/5">
             <Image src={'https://ubietysphere.ae/assets/images/contact.jpg'} height={300} width={500} alt="contact image" />

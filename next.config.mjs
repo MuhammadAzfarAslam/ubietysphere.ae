@@ -1,16 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: "standalone",
-    images: {
-        remotePatterns: [
-            {
-                protocol: "https",
-                hostname: "**.ubietysphere.ae",
-                port: "",
-                pathname: "/**",
-            },
-        ],
-    },
+  output: "standalone",
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
