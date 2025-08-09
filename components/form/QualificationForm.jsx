@@ -34,12 +34,12 @@ const QualificationForm = ({
     resolver: yupResolver(schema),
     defaultValues: {
       degreeType: data?.degreeType || "",
-      instituteName: data?.instituteName || "",
+      instituteName: data?.institutionName || "",
       fieldOfStudy: data?.fieldOfStudy || "",
-      country: data?.details?.country || "",
+      country: data?.country || "",
       mobileNumber: data?.mobileNumber || "",
-      startDate: data?.startDate ? data.startDate.split("T")[0] : "",
-      endDate: data?.endDate ? data.endDate.split("T")[0] : "",
+      startDate: data?.dateFrom ? data.dateFrom : "",
+      endDate: data?.dateTo ? data.dateTo : "",
     },
   });
 
@@ -56,18 +56,30 @@ const QualificationForm = ({
       dateTo,
     };
 
-    console.log("Update payload:", payload);
-
     try {
-      const response = await postData(`user/qualifications`, payload, {
-        Authorization: `Bearer ${accessToken}`,
-      });
-      console.log("Update response:", response);
-      addToast("Record has been Added!", "success");
+      if (data?.id) {
+        // EDIT mode
+        await putData(
+          `user/qualifications`,
+          { id: data?.id, ...payload },
+          {
+            Authorization: `Bearer ${accessToken}`,
+          }
+        );
+        addToast("Record has been updated!", "success");
+      } else {
+        // ADD mode
+        await postData(`user/qualifications`, payload, {
+          Authorization: `Bearer ${accessToken}`,
+        });
+        addToast("Record has been added!", "success");
+      }
+
       setIsOpen(false);
-      refreshCall();
+      await refreshCall();
     } catch (error) {
       console.error("Update failed:", error);
+      addToast("Something went wrong!", "error");
     }
   };
 

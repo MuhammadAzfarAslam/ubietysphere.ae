@@ -12,25 +12,43 @@ const GeneralProfile = ({ id, preValue = null, accessToken }) => {
       "dto",
       new Blob([JSON.stringify({ id })], { type: "application/json" })
     );
-    // formData.append("dto", JSON.stringify({ id })); // replace with real id
     formData.append("image", selectedFile);
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/image`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${accessToken}`, // replace with real token (e.g., from session)
+          Authorization: `Bearer ${accessToken}`,
         },
         body: formData,
       });
 
+      // This may not be reached in 413 scenario
       if (!res.ok) {
-        throw new Error("Uploa  d failed");
+        const text = await res.text();
+        console.warn("Server responded with:", res.status, text);
+
+        if (res.status === 413) {
+          addToast("File must be under 3MB", "error");
+        } else {
+          addToast("Something went wrong, please try again!", "error");
+        }
+        return;
       }
-      const data = await res.json();
+
       addToast("Your profile picture has been uploaded!", "success");
     } catch (error) {
       console.error("Upload error:", error);
+
+      // Detect 413 manually if possible
+      if (
+        error.message?.includes("413") ||  
+        error.message?.includes("Payload Too Large")
+      ) {
+        addToast("File must be under 3MB", "error");
+      } else {
+        addToast("A network error occurred. File must be under 3MB!", "error");
+      }
     }
   };
 

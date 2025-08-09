@@ -40,8 +40,10 @@ const LandingPage = () => {
       deleteCookie("userSelection");
     };
 
-    // Attach event listener for page unload (close or refresh)
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    if (window) {
+      // Attach event listener for page unload (close or refresh)
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
 
     // Cleanup the event listener when the component unmounts
     return () => {

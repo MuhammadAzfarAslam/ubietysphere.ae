@@ -1,6 +1,6 @@
 import React from "react";
 
-const EditDeleteList = ({ id, title = "title", fieldOfStudy="", deleteHandler }) => {
+const EditDeleteList = ({ id, title = "title", fieldOfStudy="", deleteHandler, editHandler }) => {
   return (
     <div className="w-full bg-primary shadow-lg rounded-sm p-3 flex justify-between items-center">
       {/* Left Title */}
@@ -10,7 +10,7 @@ const EditDeleteList = ({ id, title = "title", fieldOfStudy="", deleteHandler })
 
       {/* Right Icons */}
       <div className="flex space-x-4">
-        <button className="text-gray-500 cursor-pointer hover:text-blue-600">
+        <button className="text-gray-500 cursor-pointer hover:text-blue-600" onClick={()=>editHandler(id)}>
           <svg
             width="20"
             height="20"

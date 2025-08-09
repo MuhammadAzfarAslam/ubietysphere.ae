@@ -234,7 +234,7 @@ export default function Header({ session }) {
             </div>
             <div className="flex flex-col justify-between h-[calc(100vh-110px)]">
               <ul className="flex flex-col gap-3 p-4">
-                {menu.map((item, index) => (
+                {menu?.map((item, index) => (
                   <MenuItem
                     key={index}
                     item={item}
