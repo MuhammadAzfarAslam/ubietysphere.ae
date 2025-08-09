@@ -13,7 +13,7 @@ const sideMenu = [
     role: ["Doctor", "Patient", "Parent"],
   },
   { name: "Education", href: "/dashboard/education", role: ["Doctor"] },
-  { name: "Experience", href: "/dashboard/experience", role: ["Doctor"] },
+  { name: "License", href: "/dashboard/license", role: ["Doctor"] },
   {
     name: "Documents",
     href: "/dashboard/documents",

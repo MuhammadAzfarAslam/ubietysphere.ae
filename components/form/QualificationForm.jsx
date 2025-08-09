@@ -14,8 +14,8 @@ const schema = yup.object({
   instituteName: yup.string().required("Last name is required"),
   fieldOfStudy: yup.string().required("fieldOfStudy is required"),
   country: yup.string().required("Country is required"),
-  startDate: yup.date().required("Start Date is required"),
-  endDate: yup.date().required("End Date is required"),
+  startDate: yup.string().required("Start Date is required"),
+  endDate: yup.string().required("End Date is required"),
 });
 
 const QualificationForm = ({
