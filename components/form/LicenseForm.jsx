@@ -1,11 +1,12 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { postData, putData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
 import { useToast } from "../toaster/ToastContext";
+import Link from "next/link";
 
 // Validation schema
 const schema = yup.object({
@@ -16,8 +17,15 @@ const schema = yup.object({
   validTo: yup.string().required("Valid to date is required"),
 });
 
-const LicenseForm = ({ id, accessToken, data = {}, setIsOpen, refreshCall }) => {
+const LicenseForm = ({
+  id,
+  accessToken,
+  data = {},
+  setIsOpen,
+  refreshCall,
+}) => {
   const { addToast } = useToast();
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const {
     register,
@@ -34,12 +42,37 @@ const LicenseForm = ({ id, accessToken, data = {}, setIsOpen, refreshCall }) => 
     },
   });
 
+  const uploadLicenseImage = async (id) => {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify({ id })], { type: "application/json" })
+    );
+    formData.append("image", selectedFile);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}user/licences/image`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
+      console.log("image res", res);
+
+      addToast("License image uploaded successfully!", "success");
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      addToast("Failed to upload license image!", "error");
+    }
+  };
+
   const onSubmit = async (formData) => {
-    const formatDate = (date) => {
-      if (!date) return null;
-      return new Date(date).toISOString().split("T")[0];
-    };
-  
     const payload = {
       authority: formData.authority,
       licenceNumber: formData.licenceNumber,
@@ -47,22 +80,34 @@ const LicenseForm = ({ id, accessToken, data = {}, setIsOpen, refreshCall }) => 
       validFrom: formData.validFrom,
       validTo: formData.validTo,
     };
-  
+
     try {
+      let licenseId;
+
       if (data?.id) {
         await putData(
           `user/licences`,
           { id: data?.id, ...payload },
           { Authorization: `Bearer ${accessToken}` }
         );
+        licenseId = data?.id;
         addToast("License record updated successfully!", "success");
       } else {
-        await postData(`user/licences`, payload, {
+        const response = await postData(`user/licences`, payload, {
           Authorization: `Bearer ${accessToken}`,
         });
+        licenseId = response?.data?.id; // Make sure API returns created license ID
+        await uploadLicenseImage(licenseId);
         addToast("License record added successfully!", "success");
       }
-  
+
+      // Upload the license image if a file was selected
+      console.log("data", data);
+
+      if (licenseId) {
+        await uploadLicenseImage(licenseId);
+      }
+
       setIsOpen(false);
       await refreshCall();
     } catch (error) {
@@ -70,13 +115,14 @@ const LicenseForm = ({ id, accessToken, data = {}, setIsOpen, refreshCall }) => 
       addToast("Something went wrong!", "error");
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 register-form">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-light">Authority</label>
+          <label className="block text-sm font-medium text-light">
+            Authority
+          </label>
           <input
             type="text"
             {...register("authority")}
@@ -87,29 +133,39 @@ const LicenseForm = ({ id, accessToken, data = {}, setIsOpen, refreshCall }) => 
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-light">Licence Number</label>
+          <label className="block text-sm font-medium text-light">
+            Licence Number
+          </label>
           <input
             type="text"
             {...register("licenceNumber")}
             placeholder="Licence Number"
             className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
           />
-          <p className="text-red-500 text-sm">{errors.licenceNumber?.message}</p>
+          <p className="text-red-500 text-sm">
+            {errors.licenceNumber?.message}
+          </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-light">Specialization</label>
+          <label className="block text-sm font-medium text-light">
+            Specialization
+          </label>
           <input
             type="text"
             {...register("specialization")}
             placeholder="Specialization"
             className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
           />
-          <p className="text-red-500 text-sm">{errors.specialization?.message}</p>
+          <p className="text-red-500 text-sm">
+            {errors.specialization?.message}
+          </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-light">Valid From</label>
+          <label className="block text-sm font-medium text-light">
+            Valid From
+          </label>
           <input
             type="date"
             {...register("validFrom")}
@@ -119,7 +175,9 @@ const LicenseForm = ({ id, accessToken, data = {}, setIsOpen, refreshCall }) => 
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-light">Valid To</label>
+          <label className="block text-sm font-medium text-light">
+            Valid To
+          </label>
           <input
             type="date"
             {...register("validTo")}
@@ -127,7 +185,29 @@ const LicenseForm = ({ id, accessToken, data = {}, setIsOpen, refreshCall }) => 
           />
           <p className="text-red-500 text-sm">{errors.validTo?.message}</p>
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-light">
+            License Image
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setSelectedFile(e.target.files[0])}
+            className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
+          />
+        </div>
       </div>
+
+      {data?.imageName !== null ? (
+        <div className="text-center text-primary-light underline hover:text-blue-500">
+          <Link
+            href={`/preview?url=img/licence-images/${data?.imageName}`}
+          >
+            View File
+          </Link>
+        </div>
+      ) : null}
 
       <div>
         <FormButton additionalClass="w-full">
