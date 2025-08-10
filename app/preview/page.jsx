@@ -33,6 +33,15 @@ const page = () => {
       {imageExtensions?.includes(type) && (
         <img src={`https://cms.ubietysphere.ae/${url}`} />
       )}
+
+      {type === "pdf" && (
+        <iframe
+          src={`https://cms.ubietysphere.ae/${url}`}
+          width="100%"
+          height="600px"
+          style={{ border: 'none' }}
+        ></iframe>
+      )}
     </div>
   );
 };
