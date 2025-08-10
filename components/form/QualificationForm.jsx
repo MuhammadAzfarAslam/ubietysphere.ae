@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -8,6 +8,7 @@ import FormButton from "../button/FormButton";
 import NationalitySelect from "./NationalitySelect";
 import DegreeSelect from "./DegreeSelect";
 import { useToast } from "../toaster/ToastContext";
+import Link from "next/link";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -25,6 +26,9 @@ const QualificationForm = ({
   setIsOpen,
   refreshCall,
 }) => {
+  console.log("datadata", data);
+  
+  const [selectedFile, setSelectedFile] = useState(null);
   const { addToast } = useToast();
   const {
     register,
@@ -43,20 +47,48 @@ const QualificationForm = ({
     },
   });
 
-  const onSubmit = async (formData) => {
-    const dateFrom = new Date(formData.startDate).toISOString().split("T")[0];
-    const dateTo = new Date(formData.endDate).toISOString().split("T")[0];
+  const uploadEducationImage = async (id) => {
+    if (!selectedFile) return;
 
+    const formData = new FormData();
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify({ id })], { type: "application/json" })
+    );
+    formData.append("image", selectedFile);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}user/qualifications/image`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
+      console.log("image res", res);
+
+      addToast("Education image uploaded successfully!", "success");
+    } catch (error) {
+      console.error("Education upload failed:", error);
+      addToast("Failed to upload license image!", "error");
+    }
+  };
+
+  const onSubmit = async (formData) => {
     const payload = {
       degreeType: formData?.degreeType,
       fieldOfStudy: formData?.fieldOfStudy,
       institutionName: formData?.instituteName,
       country: formData?.country,
-      dateFrom,
-      dateTo,
+      dateFrom: formData.startDate,
+      dateTo: formData.endDate,
     };
 
     try {
+      let educationId;
       if (data?.id) {
         // EDIT mode
         await putData(
@@ -66,15 +98,22 @@ const QualificationForm = ({
             Authorization: `Bearer ${accessToken}`,
           }
         );
+        educationId = data?.id;
         addToast("Record has been updated!", "success");
       } else {
         // ADD mode
         await postData(`user/qualifications`, payload, {
           Authorization: `Bearer ${accessToken}`,
         });
+
+        educationId = response?.data?.id; // Make sure API returns created license ID
+        await uploadEducationImage(licenseId);
         addToast("Record has been added!", "success");
       }
 
+      if (educationId) {
+        await uploadEducationImage(educationId);
+      }
       setIsOpen(false);
       await refreshCall();
     } catch (error) {
@@ -188,6 +227,18 @@ const QualificationForm = ({
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-light">
+            License Image
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setSelectedFile(e.target.files[0])}
+            className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
+          />
+        </div>
+
+        <div>
           {/* <label
             htmlFor="passportNumber"
             className="block text-sm font-medium text-light"
@@ -205,6 +256,14 @@ const QualificationForm = ({
           </p> */}
         </div>
       </div>
+
+      {data?.imageName && data?.imageName !== null ? (
+        <div className="text-center text-primary-light underline hover:text-blue-500">
+          <Link href={`/preview?url=img/licence-images/${data?.imageName}`}>
+            View File
+          </Link>
+        </div>
+      ) : null}
 
       <div>
         <FormButton additionalClass={"w-full"}>Add</FormButton>
