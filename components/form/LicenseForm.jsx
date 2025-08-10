@@ -199,7 +199,7 @@ const LicenseForm = ({
         </div>
       </div>
 
-      {data?.imageName !== null ? (
+      {data?.imageName && data?.imageName !== null ? (
         <div className="text-center text-primary-light underline hover:text-blue-500">
           <Link
             href={`/preview?url=img/licence-images/${data?.imageName}`}
