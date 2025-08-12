@@ -15,9 +15,14 @@ const sideMenu = [
   { name: "Education", href: "/dashboard/education", role: ["Doctor"] },
   { name: "License", href: "/dashboard/license", role: ["Doctor"] },
   {
-    name: "Documents",
-    href: "/dashboard/documents",
-    role: ["Doctor", "Patient", "Parent"],
+    name: "My Documents",
+    href: "/dashboard/my-documents",
+    role: ["Patient", "Parent"],
+  },
+  {
+    name: "Shared Documents",
+    href: "/dashboard/shared-documents",
+    role: ["Doctor"],
   },
 ];
 
