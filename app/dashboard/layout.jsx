@@ -36,8 +36,8 @@ const DashboardLayout = async ({ params, children }) => {
   }
 
   // Example: check role
-  if (session.user.role !== "Doctor") {
-    return <p>Unauthorized: Doctors only</p>;
+  if (!["Doctor", "Patient", "Parent"]?.includes(session.user.role)) {
+    return <p>Unauthorized: Doctors only access</p>;
   }
   return (
     <ToastProvider>

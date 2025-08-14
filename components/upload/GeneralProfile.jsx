@@ -42,7 +42,7 @@ const GeneralProfile = ({ id, preValue = null, accessToken }) => {
 
       // Detect 413 manually if possible
       if (
-        error.message?.includes("413") ||  
+        error.message?.includes("413") ||
         error.message?.includes("Payload Too Large")
       ) {
         addToast("File must be under 3MB", "error");
@@ -54,6 +54,7 @@ const GeneralProfile = ({ id, preValue = null, accessToken }) => {
 
   return (
     <FileUpload
+      isDP
       preValue={preValue}
       onChange={changeHandler} // notice: pass file object, not event
       label="Upload your photo"

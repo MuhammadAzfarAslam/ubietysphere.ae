@@ -13,7 +13,7 @@ import { useToast } from "../toaster/ToastContext";
 const schema = yup.object({
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
-  dateOfBirth: yup.date().required("Date of birth is required"),
+  dateOfBirth: yup.string().required("Date of birth is required"),
   gender: yup.string().required("Gender is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   mobileNumber: yup
@@ -22,9 +22,13 @@ const schema = yup.object({
     .required("Mobile number is required"),
   address: yup.string(),
   nationality: yup.string().required("Nationality is required"),
-  // nationalId: yup.number().typeError("Must be a number"),
-  // passportNumber: yup.number().typeError("Must be a number"),
   category: yup.string().required("Category is required"),
+  totalExperience: yup.string(),
+  workDays: yup.array().of(yup.string()),
+  x: yup.string().nullable(),
+  instagram: yup.string().nullable(),
+  linkedin: yup.string().nullable(),
+  facebook: yup.string().nullable(),
 });
 
 const GeneralForm = ({ data, accessToken }) => {
@@ -48,6 +52,12 @@ const GeneralForm = ({ data, accessToken }) => {
       passportNumber: data?.details?.passportNumber || "",
       category: data?.details?.category || "",
       bio: data?.details?.bio || "",
+      totalExperience: data?.details?.totalExperience || "",
+      workDays: data?.details?.workDays || [],
+      x: data?.details?.socialMediaUrls?.x || "",
+      instagram: data?.details?.socialMediaUrls?.instagram || "",
+      linkedin: data?.details?.socialMediaUrls?.linkedin || "",
+      facebook: data?.details?.socialMediaUrls?.facebook || "",
     },
   });
 
@@ -65,6 +75,7 @@ const GeneralForm = ({ data, accessToken }) => {
       email: formData.email,
       mobileNumber: formData.mobileNumber,
       role: data?.role, // keep same
+      imageName: data?.imageName,
       details: {
         middleName1: null,
         middleName2: null,
@@ -74,6 +85,14 @@ const GeneralForm = ({ data, accessToken }) => {
         passportNumber: formData.passportNumber,
         category: formData.category,
         bio: formData.bio,
+        totalExperience: Number(formData.totalExperience), // always numeric
+        workDays: formData.workDays || [],
+        socialMediaUrls: {
+          x: formData.x || "",
+          instagram: formData.instagram || "",
+          linkedin: formData.linkedin || "",
+          facebook: formData.facebook || "",
+        },
       },
     };
 
@@ -91,8 +110,27 @@ const GeneralForm = ({ data, accessToken }) => {
     }
   };
 
+  // Experience options now have label/value
+  const experienceOptions = [
+    { label: "<1 year", value: 0 },
+    ...Array.from({ length: 30 }, (_, i) => ({
+      label: `${i + 1} year${i > 0 ? "s" : ""}`,
+      value: i + 1,
+    })),
+  ];
+
+  const weekDays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 register-form">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label
@@ -282,35 +320,153 @@ const GeneralForm = ({ data, accessToken }) => {
         </div>
 
         {data?.role === "Doctor" && (
-          <div>
-            <label
-              htmlFor="category"
-              className="block text-sm font-medium text-light"
-            >
-              Category
-            </label>
-            <CategorySelect
-              register={register}
-              defaultValue={data?.details?.category || ""}
-            />
-            <p className="text-red-500 text-sm">{errors.category?.message}</p>
-          </div>
+          <>
+            <div>
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium text-light"
+              >
+                Category
+              </label>
+              <CategorySelect
+                register={register}
+                defaultValue={data?.details?.category || ""}
+              />
+              <p className="text-red-500 text-sm">{errors.category?.message}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-light">
+                Total Experience
+              </label>
+              <select
+                {...register("totalExperience")}
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
+              >
+                <option value="">Select Experience</option>
+                {experienceOptions.map((opt, idx) => (
+                  <option key={idx} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-red-500 text-sm">
+                {errors.totalExperience?.message}
+              </p>
+            </div>
+          </>
         )}
       </div>
 
+      {/* Full Width Columns */}
       {data?.role === "Doctor" && (
-        <div>
-          <label htmlFor="bio" className="block text-sm font-medium text-light">
-            Add your introduction
-          </label>
-          <textarea
-            name="bio"
-            id="bio"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
-            {...register("bio")}
-          ></textarea>
-          <p className="text-red-500 text-sm">{errors.bio?.message}</p>
-        </div>
+        <>
+          <div>
+            <label className="block text-sm font-medium text-light">
+              Work Days
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {weekDays.map((day) => (
+                <label key={day} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    value={day}
+                    {...register("workDays")}
+                  />
+                  {day}
+                </label>
+              ))}
+            </div>
+            <p className="text-red-500 text-sm">{errors.workDays?.message}</p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="bio"
+              className="block text-sm font-medium text-light"
+            >
+              Add your introduction
+            </label>
+            <textarea
+              name="bio"
+              id="bio"
+              className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
+              {...register("bio")}
+            ></textarea>
+            <p className="text-red-500 text-sm">{errors.bio?.message}</p>
+          </div>
+        </>
+      )}
+
+      {data?.role === "Doctor" && (
+        <>
+          <h2 className="pt-4 mb-0 font-bold text-primary-light">Socials</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label
+                className="block text-sm font-medium text-light"
+                htmlFor="x"
+              >
+                X
+              </label>
+              <input
+                type="text"
+                placeholder="x.com/username"
+                {...register("x")}
+                id="x"
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm"
+              />
+            </div>
+
+            <div>
+              <label
+                className="block text-sm font-medium text-light"
+                htmlFor="instagram"
+              >
+                Instagram
+              </label>
+              <input
+                type="text"
+                id="instagram"
+                placeholder="instagram.com/username"
+                {...register("instagram")}
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm"
+              />
+            </div>
+
+            <div>
+              <label
+                className="block text-sm font-medium text-light"
+                htmlFor="linkedin"
+              >
+                LinkedIn
+              </label>
+              <input
+                type="text"
+                id="linkedin"
+                placeholder="linkedin.com/in/username"
+                {...register("linkedin")}
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm"
+              />
+            </div>
+
+            <div>
+              <label
+                className="block text-sm font-medium text-light"
+                htmlFor="facebook"
+              >
+                Facebook
+              </label>
+              <input
+                type="text"
+                id="facebook"
+                placeholder="facebook.com/username"
+                {...register("facebook")}
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm"
+              />
+            </div>
+          </div>
+        </>
       )}
 
       <div>

@@ -7,6 +7,7 @@ export default function FileUpload({
   label = "Upload File",
   accept = "*",
   className = "",
+  isDP = false,
   ...props
 }) {
   const [preview, setPreview] = useState(preValue);
@@ -55,7 +56,8 @@ export default function FileUpload({
 
       {/* Show preview if it’s an image */}
       {preview !== null &&
-      (preview.startsWith("data:") ||
+      (isDP ||
+        preview.startsWith("data:") ||
         preview.startsWith("blob:") ||
         preview.match(/\.(jpeg|jpg|png|gif|webp)$/i)) ? (
         <img

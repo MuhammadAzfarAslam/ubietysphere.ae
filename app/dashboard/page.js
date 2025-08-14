@@ -22,8 +22,9 @@ export default async function DashboardPage() {
           id={res?.data?.id}
           accessToken={session?.accessToken}
           preValue={
-            `https://cms.ubietysphere.ae/img/user-images/${res?.data?.imageName}` ||
-            "https://ubietysphere.ae/assets/images/placeholder-user.png"
+            res?.data?.imageName !== null
+              ? `https://cms.ubietysphere.ae/img/user-images/${res?.data?.imageName}`
+              : "https://ubietysphere.ae/assets/images/placeholder-user.png"
           }
         />
         <div>
