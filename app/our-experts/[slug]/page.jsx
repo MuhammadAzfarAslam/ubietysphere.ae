@@ -22,7 +22,9 @@ const ExpertDetailPage = async ({ params }) => {
     <>
       <Breadcrumb title="Meet Our Experts">
         <span>/</span>
-        <span className="text-primary-light font-medium capitalize">Our {slugToTitle(slug)}</span>
+        <span className="text-primary-light font-medium capitalize">
+          Our {slugToTitle(slug)}
+        </span>
       </Breadcrumb>
       <section className="relative bg-primary-light py-16">
         {/* White Overlay */}
@@ -39,11 +41,14 @@ const ExpertDetailPage = async ({ params }) => {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 pt-12">
             {res?.data?.content?.map(
-              ({ id, firstName, lastName, imageName }) => (
+              ({ id, firstName, lastName, imageName, slug: doctorSlug, totalExperience }) => (
                 <TeamCard
                   key={id}
                   title={`Dr. ${firstName} ${lastName}`}
-                  designation="Senior Psychologist"
+                  designation={slugToTitle(slug)}
+                  slug={doctorSlug}
+                  service={slug}
+                  totalExperience={totalExperience}
                   imageURL={
                     imageName !== null
                       ? `https://cms.ubietysphere.ae/img/user-images/${imageName}`
