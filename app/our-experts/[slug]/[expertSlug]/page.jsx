@@ -4,6 +4,7 @@ import { slugToTitle } from "@/utils/general";
 import Link from "next/link";
 import getData from "@/utils/getData";
 import NextImage from "@/components/nextImage/NextImage";
+import BookingForm from "@/components/form/BookingForm";
 
 const Instagram = () => {
   return (
@@ -53,8 +54,8 @@ const LinkedIn = () => {
         d="M8 10v7M8 7v.01M12 17v-4.5a2 2 0 0 1 4 0V17"
         stroke="currentColor"
         strokeWidth="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -112,7 +113,7 @@ const ExpertDetailPage = async ({ params }) => {
   const { slug, expertSlug } = await params;
 
   const res = await getData(`doctor?slug=${expertSlug}`, {});
-  const content = res?.data?.content?.[0];
+  const content = res?.data;
   console.log("expert response", res);
   console.log(
     "image url",
@@ -131,7 +132,7 @@ const ExpertDetailPage = async ({ params }) => {
           {slugToTitle(expertSlug)}
         </span>
       </Breadcrumb>
-      <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="max-w-7xl w-full mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Sticky Image */}
         <div className="lg:grid-cols-2">
           <div className="sticky top-6">
@@ -274,6 +275,67 @@ const ExpertDetailPage = async ({ params }) => {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+      <div className="max-w-7xl bg-[#e8e6f2] items-center rounded-[20px] w-full mx-auto mt-6 mb-15 lg:p-[60px] p-[20px] grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="lg:grid-cols-2">
+          <h2 className="text-4xl font-bold text-center mb-10 text-gray-800">
+            Our Working Process
+          </h2>
+          <div className="">
+            <div className="flex items-center text-left gap-3 mb-8">
+              <div className=" text-white bg-green-500 lg:p-6 p-3 flex items-center justify-center rounded-full">
+                <span className="text-3xl font-semibold">01</span>
+              </div>
+              <p className="text-gray-600">
+                <b className="text-xl font-semibold text-black">
+                  Fill The Form:
+                </b>{" "}
+                There are many variations of passage of Lorem Ipsum available,
+                but the majority have suffered.
+              </p>
+            </div>
+            <div className="flex items-center text-left gap-3 mb-8">
+              <div className=" text-white bg-blue-500 lg:p-6 p-3 flex items-center justify-center rounded-full">
+                <span className="text-3xl font-semibold">02</span>
+              </div>
+              <p className="text-gray-600">
+                <b className="text-xl font-semibold text-black">
+                  Book an Appointment:
+                </b>{" "}
+                There are many variations of passage of Lorem Ipsum available,
+                but the majority have suffered.
+              </p>
+            </div>
+            <div className="flex items-center text-left gap-3 mb-8">
+              <div className=" text-white bg-pink-500 lg:p-6 p-3 flex items-center justify-center rounded-full">
+                <span className="text-3xl font-semibold">03</span>
+              </div>
+              <p className="text-gray-600">
+                <b className="text-xl font-semibold text-black">Check-Ups:</b>{" "}
+                There are many variations of passage of Lorem Ipsum available,
+                but the majority have suffered.
+              </p>
+            </div>
+            <div className="flex items-center text-left gap-3">
+              <div className=" text-white bg-yellow-500 lg:p-6 p-3 flex items-center justify-center rounded-full">
+                <span className="text-3xl font-semibold">04</span>
+              </div>
+              <p className="text-gray-600">
+                <b className="text-xl font-semibold text-black">Get Reports:</b>{" "}
+                There are many variations of passage of Lorem Ipsum available,
+                but the majority have suffered.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="lg:grid-cols-2">
+          <div className="bg-white lg:p-[28px] p-[10px] rounded-2xl">
+            <h3 className="text-center text-3xl capitalize font-medium">
+              Book a consultation
+            </h3>
+            <BookingForm doctorName={expertSlug} />
           </div>
         </div>
       </div>
