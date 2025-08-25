@@ -40,7 +40,7 @@ const menu = [
       { name: "Other", href: "/our-experts/other" },
     ],
   },
-  { name: "OLA DOC", href: "https://oladoc.com/" },
+  { name: "OKADOC", href: "https://www.okadoc.com/" },
   { name: "Contact", href: "/contact" },
 ];
 
