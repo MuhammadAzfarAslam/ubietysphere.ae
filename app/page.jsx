@@ -66,9 +66,9 @@ const faqs = [
   },
 ];
 
-export default function Home() {
-  const cookieStore = cookies();
-  const landingPageSeen = cookieStore.get('landingPageSeen');
+export default async function Home() {
+  const cookieStore = await cookies();
+  const landingPageSeen = cookieStore?.get('landingPageSeen');
 
   // If the cookie exists, don't show the LandingPage
   const showLanding = !landingPageSeen;

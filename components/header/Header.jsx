@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -106,7 +107,8 @@ const MenuItem = ({ item, onClick }) => {
   );
 };
 
-export default function Header({ session }) {
+export default function Header() {
+  const { data: session, status } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (

@@ -266,7 +266,7 @@ const QualificationForm = ({
       ) : null}
 
       <div>
-        <FormButton additionalClass={"w-full"}>Add</FormButton>
+        <FormButton additionalClass={"w-full"}>{data?.id ? 'Update' : 'Add'}</FormButton>
       </div>
     </form>
   );

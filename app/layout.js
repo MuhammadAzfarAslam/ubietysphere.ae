@@ -2,8 +2,7 @@ import { Lexend_Deca } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header/Header";
 import Footer from "@/components/footer/Footer";
-import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { Providers } from "@/components/providers";
 
 const lexendDeca = Lexend_Deca({
   subsets: ['latin'],
@@ -17,13 +16,12 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const session = await getServerSession(authOptions) || {};
   return (
     <html lang="en">
       <body
         className={`${lexendDeca.variable} antialiased`}
       >
-        <Header session={session} />
+        <Providers><Header /></Providers>
         <main className="flex flex-col" style={{ minHeight: 'calc(100vh - 98px)' }}>
         {children}
         </main>

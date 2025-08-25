@@ -28,10 +28,12 @@ const sideMenu = [
 
 const DashboardLayout = async ({ params, children }) => {
   const session = await getServerSession(authOptions);
+
   console.log("📜 Session:", session);
 
-  if (!session) {
-    // Redirect unauthenticated users
+  if (!session || session?.user?.role === undefined) {
+
+    // Redirect to login
     redirect("/login");
   }
 
