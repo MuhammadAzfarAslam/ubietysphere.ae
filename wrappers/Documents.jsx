@@ -4,6 +4,7 @@ import EducationHeader from "@/components/header/EducationHeader";
 import EditDeleteList from "@/components/list/EditDeleteList";
 import DocumentForm from "@/components/form/DocumentForm";
 import Modal from "@/components/modal/Modal";
+import ShareDocument from "@/components/modal/ShareDocument";
 import { useToast } from "@/components/toaster/ToastContext";
 import getData, { postData } from "@/utils/getData";
 
@@ -14,6 +15,10 @@ const Documents = ({ data, id, accessToken }) => {
   // For Add/Edit modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+
+  // For Share modal
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareData, setShareData] = useState(null);
 
   const refreshCall = async () => {
     const res = await getData("user/reports", {
@@ -53,6 +58,12 @@ const Documents = ({ data, id, accessToken }) => {
     setIsModalOpen(true);
   };
 
+  const shareHandler = (documentId) => {
+    const documentToShare = content.find((item) => item.id === documentId);
+    setShareData(documentToShare);
+    setIsShareModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <EducationHeader onAdd={addHandler} title="Documents" />
@@ -62,8 +73,11 @@ const Documents = ({ data, id, accessToken }) => {
           id={item?.id} 
           title={item?.title || item?.fileName || "Document"}
           fieldOfStudy={item?.category || item?.type || "Report"}
+          fileName={item?.fileName}
+          showShare={true}
           deleteHandler={deleteHandler}
           editHandler={editHandler}
+          shareHandler={shareHandler}
         />
       ))}
 
@@ -81,6 +95,13 @@ const Documents = ({ data, id, accessToken }) => {
           data={editData} // pre-fill for edit
         />
       </Modal>
+
+      {/* Share Document Modal */}
+      <ShareDocument
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        documentData={shareData}
+      />
     </div>
   );
 };

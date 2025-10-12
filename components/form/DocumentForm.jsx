@@ -6,6 +6,7 @@ import * as yup from "yup";
 import { postData, putData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
 import { useToast } from "../toaster/ToastContext";
+import Link from "next/link";
 
 // Medical treatment categories
 const medicalCategories = [
@@ -156,6 +157,25 @@ const DocumentForm = ({
         <label className="block text-sm font-medium text-gray-700">
           File*
         </label>
+        
+        {/* Show current file when editing */}
+        {data?.id && data?.fileName && (
+          <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-sm">
+            <p className="text-sm text-gray-600 mb-2">Current file:</p>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-800">{data.fileName}</span>
+              <Link
+                href={`/preview?url=img/reports-images/${data?.fileName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:text-primary-dark underline text-sm"
+              >
+                View File
+              </Link>
+            </div>
+          </div>
+        )}
+        
         <input
           type="file"
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"

@@ -1,6 +1,6 @@
 import React from "react";
 
-const EditDeleteList = ({ id, title = "title", fieldOfStudy="", deleteHandler, editHandler }) => {
+const EditDeleteList = ({ id, title = "title", fieldOfStudy="", fileName, deleteHandler, editHandler, shareHandler, showShare = false }) => {
   return (
     <div className="w-full bg-primary shadow-lg rounded-sm p-3 flex justify-between items-center">
       {/* Left Title */}
@@ -10,6 +10,27 @@ const EditDeleteList = ({ id, title = "title", fieldOfStudy="", deleteHandler, e
 
       {/* Right Icons */}
       <div className="flex space-x-4">
+        {/* Share Icon - Only show if showShare is true */}
+        {showShare && fileName && (
+          <button
+            onClick={() => shareHandler(id)}
+            className="text-white cursor-pointer hover:text-green-600"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.12549 15.0077 5.24896 15.0227 5.36964L8.08331 9.73036C7.54305 9.27806 6.80851 9 6 9C4.34315 9 3 10.3431 3 12C3 13.6569 4.34315 15 6 15C6.80851 15 7.54305 14.7219 8.08331 14.2696L15.0227 18.6304C15.0077 18.751 15 18.8745 15 19C15 20.6569 16.3431 22 18 22C19.6569 22 21 20.6569 21 19C21 17.3431 19.6569 16 18 16C17.1915 16 16.457 16.2781 15.9167 16.7304L8.97727 12.3696C8.99234 12.249 9 12.1255 9 12C9 11.8745 8.99234 11.751 8.97727 11.6304L15.9167 7.26964C16.457 7.72194 17.1915 8 18 8Z"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+        )}
+        
         <button className="text-gray-500 cursor-pointer hover:text-blue-600" onClick={()=>editHandler(id)}>
           <svg
             width="20"
