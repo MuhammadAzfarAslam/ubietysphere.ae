@@ -3,12 +3,16 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useSession } from "next-auth/react";
 import { postData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
 
-// ✅ Validation Schema
-const schema = yup.object({
+// ✅ Validation Schema - will be created dynamically based on auth status
+const createSchema = (isLoggedIn) => yup.object({
   name: yup.string().required("Name is required"),
+  email: isLoggedIn 
+    ? yup.string().email("Please enter a valid email address")
+    : yup.string().email("Please enter a valid email address").required("Email is required"),
   phone: yup
     .string()
     .required("Phone number is required")
@@ -23,18 +27,26 @@ const schema = yup.object({
 });
 
 const BookingForm = ({ doctorName = null }) => {
+  const { data: session } = useSession();
   const [isSubmit, setIsSubmit] = useState(false);
+  const isLoggedIn = !!session?.user?.name;
+  
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm({ resolver: yupResolver(schema) });
+  } = useForm({ resolver: yupResolver(createSchema(isLoggedIn)) });
 
   const onSubmit = async (data) => {
     // If doctorName provided in props, override dropdown value
     if (doctorName) {
       data.doctor = doctorName;
+    }
+
+    // If user is logged in, use their email from session
+    if (isLoggedIn && session?.user?.email) {
+      data.email = session.user.email;
     }
 
     const formData = new FormData();
@@ -72,6 +84,22 @@ const BookingForm = ({ doctorName = null }) => {
           />
           <p className="text-red-500 text-sm">{errors.name?.message}</p>
         </div>
+
+        {/* Email - Only show if user is not logged in */}
+        {!isLoggedIn && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Email*
+            </label>
+            <input
+              type="email"
+              placeholder="Enter your Email"
+              className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:primary"
+              {...register("email")}
+            />
+            <p className="text-red-500 text-sm">{errors.email?.message}</p>
+          </div>
+        )}
 
         {/* Phone */}
         <div>

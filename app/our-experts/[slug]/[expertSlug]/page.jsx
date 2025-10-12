@@ -4,7 +4,7 @@ import { slugToTitle } from "@/utils/general";
 import Link from "next/link";
 import getData from "@/utils/getData";
 import NextImage from "@/components/nextImage/NextImage";
-import BookingForm from "@/components/form/BookingForm";
+import BookingFormWrapper from "@/components/form/BookingFormWrapper";
 
 const Instagram = () => {
   return (
@@ -335,7 +335,7 @@ const ExpertDetailPage = async ({ params }) => {
             <h3 className="text-center text-3xl capitalize font-medium">
               Book a consultation
             </h3>
-            <BookingForm doctorName={expertSlug} />
+            <BookingFormWrapper doctorName={expertSlug} />
           </div>
         </div>
       </div>
