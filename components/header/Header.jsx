@@ -47,7 +47,7 @@ const menu = [
 const registerMenu = [
   { name: "As Parent", href: "/register/parent" },
   { name: "As Seeker", href: "/register/seeker" },
-  { name: "As Provider", href: "/register/provider" },
+  // { name: "As Provider", href: "/register/provider" },
 ];
 
 const MenuItem = ({ item, onClick }) => {
@@ -135,25 +135,27 @@ export default function Header() {
                   Login
                 </Link>
               )}
-              <div className="relative group pl-4">
-                {/* Register Button */}
-                <button className="text-white text-xs hidden lg:block cursor-pointer hover:underline">
-                  Register
-                </button>
+              {!session?.user?.name && (
+                <div className="relative group pl-4">
+                  {/* Register Button */}
+                  <button className="text-white text-xs hidden lg:block cursor-pointer hover:underline">
+                    Register
+                  </button>
 
-                {/* Dropdown Menu (visible on hover) */}
-                <div className="absolute right-0 hidden group-hover:block py-2.5 bg-white shadow-lg rounded-md mt-0 w-30 z-[9999]">
-                  {registerMenu.map((item, index) => (
-                    <Link
-                      href={item.href}
-                      key={index}
-                      className="block text-gray-700 px-4 text-sm py-1 hover:bg-gray-100 rounded-md"
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
+                  {/* Dropdown Menu (visible on hover) */}
+                  <div className="absolute right-0 hidden group-hover:block py-2.5 bg-white shadow-lg rounded-md mt-0 w-30 z-[9999]">
+                    {registerMenu.map((item, index) => (
+                      <Link
+                        href={item.href}
+                        key={index}
+                        className="block text-gray-700 px-4 text-sm py-1 hover:bg-gray-100 rounded-md"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -246,21 +248,32 @@ export default function Header() {
               </ul>
               <ul className="flex flex-col gap-4 p-4">
                 <li className="mt-4 flex flex-col gap-1">
-                  <Link
-                    href="/login"
-                    className="inline-block text-sm underline font-medium"
-                  >
-                    Login
-                  </Link>
-                  {registerMenu.map((item, index) => (
+                  {session?.user?.name ? (
                     <Link
-                      href={item.href}
-                      key={index}
+                      href="/dashboard"
                       className="inline-block text-sm underline font-medium"
                     >
-                      Register {item.name}
+                      Dashboard
                     </Link>
-                  ))}
+                  ) : (
+                    <>
+                      <Link
+                        href="/login"
+                        className="inline-block text-sm underline font-medium"
+                      >
+                        Login
+                      </Link>
+                      {registerMenu.map((item, index) => (
+                        <Link
+                          href={item.href}
+                          key={index}
+                          className="inline-block text-sm underline font-medium"
+                        >
+                          Register {item.name}
+                        </Link>
+                      ))}
+                    </>
+                  )}
                 </li>
               </ul>
             </div>
