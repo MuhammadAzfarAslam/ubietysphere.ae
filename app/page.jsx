@@ -4,7 +4,7 @@ import LandingPage from "@/components/modal/LandingPage";
 import { cookies } from "next/headers";
 import Image from "next/image";
 
-const services = [
+export const services = [
   {
     icon: "📚", // Replace with your actual SVG/icon
     title: "Nutrition counseling",
