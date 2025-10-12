@@ -3,9 +3,15 @@ import React from "react";
 import { signOut } from "next-auth/react";
 
 const Logout = () => {
+  const handleLogout = () => {
+    // Get the current origin (works in both dev and production)
+    const baseUrl = window.location.origin;
+    signOut({ callbackUrl: `${baseUrl}/` });
+  };
+
   return (
     <button
-      onClick={() => signOut({ callbackUrl: "https://ubietysphere.ae/login" })}
+      onClick={handleLogout}
       className="inline-block lg:px-6 px-3 lg:py-3 py-1 bg-red-500 text-white font-medium rounded-sm shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition lg:mt-0 mt-2"
     >
       <span className="relative z-10 group-hover:text-primary">Logout</span>
