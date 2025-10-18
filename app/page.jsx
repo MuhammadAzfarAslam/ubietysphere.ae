@@ -1,6 +1,6 @@
 import HomepageBanner from "@/components/banner/HomepageBanner";
 import FaqItem from "@/components/faq/FaqItem";
-import LandingPage from "@/components/modal/LandingPage";
+import LandingPageWrapper from "@/components/modal/LandingPageWrapper";
 import { cookies } from "next/headers";
 import Image from "next/image";
 
@@ -74,7 +74,7 @@ export default async function Home() {
   const showLanding = !landingPageSeen;
   return (
     <>
-      {showLanding && <LandingPage />}
+      <LandingPageWrapper showLanding={showLanding} />
       <HomepageBanner />
       {/* Six Column Section */}
       <div className="relative z-999 px-6 lg:px-0 py-6 lg:py-0 rounded-2xl">

@@ -14,9 +14,12 @@ export default async function getData(url, additional = {}) {
     });
 
     if (res?.status === 401) {
-      console.log("====================== inside logout");
-
-      signOut({ callbackUrl: "/login" });
+      console.log("🚨 401 Unauthorized - Token expired or invalid, logging out");
+      // Only call signOut if we're on the client side
+      if (typeof window !== "undefined") {
+        signOut({ callbackUrl: "/login" });
+      }
+      throw new Error("401 Unauthorized - Session expired");
     } else if (res?.status === 201 || res?.status === 200 || res?.ok) {
       return res.json();
     } else if (!res.ok || res.status !== 200 || res.status !== 201) {
@@ -36,7 +39,7 @@ export default async function getData(url, additional = {}) {
     }
   } catch (error) {
     console.error("Error:", error);
-    if (error.message.includes("401")) {
+    if (error.message.includes("401") && typeof window !== "undefined") {
       signOut({ callbackUrl: "/login" });
     }
     throw error; // Re-throw the error to propagate it
@@ -102,7 +105,12 @@ export async function putData(url, body = {}, additionalHeaders = {}) {
     });
 
     if (res?.status === 401) {
-      signOut({ callbackUrl: "/login" });
+      console.log("🚨 401 Unauthorized - Token expired or invalid, logging out");
+      // Only call signOut if we're on the client side
+      if (typeof window !== "undefined") {
+        signOut({ callbackUrl: "/login" });
+      }
+      throw new Error("401 Unauthorized - Session expired");
     } else if (res?.status === 201 || res?.status === 200 || res?.ok) {
       return res.json();
     } else if (!res.ok || res.status !== 200 || res.status !== 201) {

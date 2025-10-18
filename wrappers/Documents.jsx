@@ -7,10 +7,17 @@ import Modal from "@/components/modal/Modal";
 import ShareDocument from "@/components/modal/ShareDocument";
 import { useToast } from "@/components/toaster/ToastContext";
 import getData, { postData } from "@/utils/getData";
+import useTokenValidation from "@/hooks/useTokenValidation";
 
 const Documents = ({ data, id, accessToken }) => {
   const { addToast } = useToast();
+  const { isTokenValid } = useTokenValidation();
   const [content, setContent] = useState(data?.content || []);
+
+  // Check if token is valid, if not, the hook will handle logout
+  if (!isTokenValid) {
+    return <div>Redirecting to login...</div>;
+  }
 
   // For Add/Edit modal
   const [isModalOpen, setIsModalOpen] = useState(false);
