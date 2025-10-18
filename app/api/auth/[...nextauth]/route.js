@@ -52,7 +52,13 @@ export const authOptions = {
       
       // Initialize token if it doesn't exist
       if (!token) {
-        token = {};
+        token = {
+          accessToken: null,
+          role: null,
+          expiresAt: null,
+          expired: false,
+          invalid: false
+        };
       }
       
       if (user) {
@@ -90,8 +96,20 @@ export const authOptions = {
 
       // Check if the token has expired, is missing, or is invalid
       if (!token || !token.accessToken || token.expired || token.invalid || (token.expiresAt && Date.now() > token.expiresAt)) {
-        console.log("📦 Session expired or missing token, returning null");
-        return null; // Expired session, return null to clear the session
+        console.log("📦 Session expired or missing token, returning empty session");
+        // Return an empty session object instead of null to avoid NextAuth errors
+        return {
+          user: null,
+          expires: new Date(0).toISOString()
+        };
+      }
+
+      // Ensure session and user objects exist
+      if (!session) {
+        session = {};
+      }
+      if (!session.user) {
+        session.user = {};
       }
 
       session.accessToken = token.accessToken; // expose in session
@@ -103,6 +121,12 @@ export const authOptions = {
 
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+
+  pages: {
+    signIn: '/login',
+    error: '/login',
   },
 
   secret: process.env.NEXTAUTH_SECRET,

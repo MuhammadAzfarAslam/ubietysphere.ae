@@ -2,7 +2,7 @@ import React from "react";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb";
 import Image from "next/image";
 import { services } from "../page";
-import JoinOurTeam from "@/components/form/JoinOurTeam";
+import JoinOurTeamWrapper from "@/components/form/JoinOurTeamWrapper";
 
 const ContactPage = () => {
   return (
@@ -24,7 +24,7 @@ const ContactPage = () => {
           </div> */}
           {/* <div className="w-full md:w-3/5"> */}
           <div className="w-full">
-            <JoinOurTeam />
+            <JoinOurTeamWrapper />
           </div>
         </div>
       </section>

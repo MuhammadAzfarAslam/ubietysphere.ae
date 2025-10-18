@@ -1,15 +1,22 @@
 "use client";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const useTokenValidation = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Only run on client side and when session is loaded
     if (status === "loading") return;
+
+    // Don't redirect if we're already on login page or other public pages
+    const publicPages = ["/login", "/register", "/forgot-password", "/reset-password", "/verify-email", "/join-our-team", "/contact", "/our-experts", "/our-services"];
+    if (publicPages.includes(pathname)) {
+      return;
+    }
 
     // Check if session is null or undefined (user not authenticated)
     if (status === "unauthenticated" || !session) {

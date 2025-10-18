@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { postData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
+import { useToast } from "../toaster/ToastContext";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -23,6 +24,7 @@ const schema = yup.object({
     .required("Total years of experience is required")
     .min(0, "Experience cannot be negative")
     .max(50, "Experience seems too high"),
+  coverLetter: yup.string().required("Cover letter is required"),
   resume: yup.mixed().required("Resume is required"),
   license: yup.mixed().required("License is required"),
 });
@@ -31,6 +33,7 @@ const JoinOurTeam = () => {
   const [isSubmit, setIsSubmit] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
   const [licenseFile, setLicenseFile] = useState(null);
+  const { addToast } = useToast();
   
   const {
     register,
@@ -41,31 +44,72 @@ const JoinOurTeam = () => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
+    console.log("Form data:", data);
+    console.log("Resume file:", resumeFile);
+    console.log("License file:", licenseFile);
+    
+    // Validate files are selected
+    if (!resumeFile || !licenseFile) {
+      addToast("Please select both resume and license files", "error");
+      return;
+    }
+
     // Create FormData to handle file uploads
     const formData = new FormData();
-    formData.append("firstName", data.firstName);
-    formData.append("lastName", data.lastName);
-    formData.append("email", data.email);
-    formData.append("phone", data.phone);
-    formData.append("totalExperience", data.totalExperience);
+    
+    // Create the DTO object as JSON string (matching API format)
+    const dto = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      totalExperience: parseInt(data.totalExperience),
+      phone: data.phone,
+      coverLetter: data.coverLetter,
+      email: data.email
+    };
+    
+    console.log("DTO object:", dto);
+    
+    // Append the DTO as Blob (binary) - matching LicenseForm format
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(dto)], { type: "application/json" })
+    );
+    
+    // Append files
     formData.append("resume", resumeFile);
     formData.append("license", licenseFile);
+    
+    console.log("FormData contents:");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
     try {
-      const res = await postData(`join-our-team`, formData);
-      console.log("res", res);
+      // Use direct fetch like in LicenseForm instead of postData utility
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/doctor-applications`, {
+        method: "POST",
+        body: formData,
+      });
+      
+      console.log("Response status:", res.status);
+      console.log("Response headers:", res.headers);
+      
+      const responseText = await res.text();
+      console.log("Response body:", responseText);
 
-      if (res.status === 201) {
+      if (res.status === 201 || res.status === 200) {
         setIsSubmit(true);
+        addToast("Application submitted successfully! We will review your submission and get back to you soon.", "success");
         reset();
         setResumeFile(null);
         setLicenseFile(null);
       } else {
-        alert("Something went wrong, please try again!");
+        console.error("API Error:", responseText);
+        addToast(`Something went wrong! Status: ${res.status}`, "error");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Something went wrong, please try again!");
+      addToast("Something went wrong, please try again!", "error");
     }
   };
 
@@ -202,7 +246,7 @@ const JoinOurTeam = () => {
           </label>
           <input
             type="file"
-            accept=".pdf,.doc,.docx"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
             onChange={(e) => handleResumeChange(e.target.files[0])}
             className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
           />
@@ -230,6 +274,27 @@ const JoinOurTeam = () => {
           </p>
         </div>
         <div></div>
+      </div>
+
+      {/* Cover Letter Row */}
+      <div>
+        <label
+          htmlFor="coverLetter"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Cover Letter*
+        </label>
+        <textarea
+          id="coverLetter"
+          name="coverLetter"
+          rows="4"
+          placeholder="Tell us why you want to join our team..."
+          className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          {...register("coverLetter")}
+        />
+        <p className="text-red-500 text-sm">
+          {errors.coverLetter && errors.coverLetter.message} &nbsp;
+        </p>
       </div>
 
       {/* Submit Button */}
