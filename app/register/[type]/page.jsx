@@ -1,8 +1,9 @@
 import Register from "@/components/form/Register";
 import React from "react";
 
-const RegisterPage = async ({ params }) => {
+const RegisterPage = async ({ params, searchParams }) => {
   const { type } = await params;
+  const { token } = await searchParams;
 
   const role =
     type === "provider" ? "Doctor" : type === "seeker" ? "Patient" : "Parent";
@@ -19,7 +20,7 @@ const RegisterPage = async ({ params }) => {
           <h2 className="text-2xl font-semibold text-white text-center mb-6">
             Register as {type?.toUpperCase()}
           </h2>
-          <Register role={role} />
+          <Register role={role} token={token} />
         </div>
       </div>
     </div>

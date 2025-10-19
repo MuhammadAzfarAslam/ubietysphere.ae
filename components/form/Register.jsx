@@ -27,7 +27,7 @@ const schema = yup.object({
   password: yup.string().required("Password is required"),
 });
 
-const Register = ({ role }) => {
+const Register = ({ role, token }) => {
   const [isOkay, setIsOkay] = useState(false);
   const {
     register,
@@ -39,10 +39,20 @@ const Register = ({ role }) => {
     const formattedDate = new Date(data.dateOfBirth)
       .toISOString()
       .split("T")[0];
-    const res = await postData(
-      `user/signup`,
-      { ...data, dateOfBirth: formattedDate, role } // Pass role from props
-    );
+
+    // Prepare payload with token if role is Doctor (provider)
+    const payload = {
+      ...data,
+      dateOfBirth: formattedDate,
+      role
+    };
+
+    // Add token to payload if role is Doctor and token exists
+    if (role === "Doctor" && token) {
+      payload.token = token;
+    }
+
+    const res = await postData(`user/signup`, payload);
     if (res.status === 201) {
       setIsOkay(true);
     } else {
