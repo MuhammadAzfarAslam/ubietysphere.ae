@@ -100,7 +100,7 @@ const DoctorApplicationCard = ({
             <div className="inline-flex space-x-2">
               {resumeFileName && (
                 <Link 
-                  href={`https://cms.ubietysphere.ae/img/user-reports/${resumeFileName}`}
+                  href={`https://cms.ubietysphere.ae/img/doctor-application/${resumeFileName}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-300 hover:text-blue-200 underline"
@@ -113,7 +113,7 @@ const DoctorApplicationCard = ({
               )}
               {licenceFileName && (
                 <Link 
-                  href={`https://cms.ubietysphere.ae/img/user-reports/${licenceFileName}`}
+                  href={`https://cms.ubietysphere.ae/img/doctor-application/${licenceFileName}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-300 hover:text-blue-200 underline"

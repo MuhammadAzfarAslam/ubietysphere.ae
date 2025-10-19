@@ -1,19 +1,6 @@
 "use client";
 import React from "react";
-
-const categories = [
-  "Physician",
-  "Nurse",
-  "Dentist",
-  "Optometrist",
-  "Audiometrist",
-  "Physiotherapist",
-  "Psychologist",
-  "Nutritionist",
-  "Navigator",
-  "Support",
-  "Other"
-];
+import { DOCTOR_CATEGORIES } from "@/utils/enums";
 
 export default function CategorySelect({ register, defaultValue, name= "category" }) {
   return (
@@ -25,7 +12,7 @@ export default function CategorySelect({ register, defaultValue, name= "category
       {...register(name)}
     >
       <option value="">Select {name}</option>
-      {categories.map((cat) => (
+      {DOCTOR_CATEGORIES.map((cat) => (
         <option key={cat} value={cat}>
           {cat}
         </option>

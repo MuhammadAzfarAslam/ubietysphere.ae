@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DoctorCard from "@/components/list/DoctorCard";
 import getData from "@/utils/getData";
+import { DOCTOR_CATEGORIES } from "@/utils/enums";
 
 const DoctorsList = ({ initialData, accessToken }) => {
   const router = useRouter();
@@ -20,9 +21,6 @@ const DoctorsList = ({ initialData, accessToken }) => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [professionFilter, setProfessionFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
-
-  // Get unique professions from all doctors
-  const professions = [...new Set(doctors.map(doctor => doctor.details?.category).filter(Boolean))];
 
   // Apply client-side filters
   const getFilteredDoctors = () => {
@@ -142,9 +140,9 @@ const DoctorsList = ({ initialData, accessToken }) => {
             className="w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
           >
             <option value="all">All Professions</option>
-            {professions.map((profession) => (
-              <option key={profession} value={profession}>
-                {profession}
+            {DOCTOR_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {category}
               </option>
             ))}
           </select>
