@@ -6,23 +6,20 @@ import * as yup from "yup";
 import FormButton from "../button/FormButton";
 import { useToast } from "../toaster/ToastContext";
 import Modal from "./Modal";
+import { postData } from "@/utils/getData";
+import { useSession } from "next-auth/react";
 
-// Validation schema for email
+// Validation schema for doctor email/id
 const schema = yup.object({
-  email: yup
+  doctor: yup
     .string()
-    .email("Please enter a valid email address")
-    .required("Email is required"),
+    .required("Doctor email or ID is required"),
 });
 
 const ShareDocument = ({ isOpen, onClose, documentData }) => {
-  const [sharedEmails, setSharedEmails] = useState([
-    // Mock data - replace with actual API data
-    { id: 1, email: "john@example.com" },
-    { id: 2, email: "sarah@example.com" },
-  ]);
-  
+  const [sharedEmails, setSharedEmails] = useState([]);
   const { addToast } = useToast();
+  const { data: session } = useSession();
   
   const {
     register,
@@ -35,18 +32,41 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
 
   const onSubmit = async (data) => {
     try {
-      // TODO: API call to share document
-      console.log("Sharing document with:", data.email);
-      
-      // Add to shared emails list (temporary)
-      const newEmail = {
-        id: Date.now(),
-        email: data.email,
+      if (!documentData?.id) {
+        addToast("No document selected to share!", "error");
+        return;
+      }
+
+      // Prepare the request body according to the API spec
+      const requestBody = {
+        doctor: data.doctor, // Can be user ID or email
+        reports: [
+          {
+            id: documentData.id
+          }
+        ]
       };
-      setSharedEmails([...sharedEmails, newEmail]);
-      
-      addToast("Document shared successfully!", "success");
-      reset();
+
+      // Call the API to share the document
+      const response = await postData(
+        "user/reports/share",
+        requestBody,
+        {
+          Authorization: `Bearer ${session?.accessToken}`,
+        }
+      );
+
+      if (response) {
+        // Add to shared emails list for display
+        const newEntry = {
+          id: Date.now(),
+          email: data.doctor,
+        };
+        setSharedEmails([...sharedEmails, newEntry]);
+
+        addToast("Document shared successfully!", "success");
+        reset();
+      }
     } catch (error) {
       console.error("Share failed:", error);
       addToast("Failed to share document!", "error");
@@ -85,20 +105,20 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Share with email
+            Share with Doctor
           </label>
           <div className="flex gap-2">
             <input
-              type="email"
-              placeholder="Enter email address"
+              type="text"
+              placeholder="Enter doctor email or ID"
               className="flex-1 p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
-              {...register("email")}
+              {...register("doctor")}
             />
             <FormButton type="submit">
               Share
             </FormButton>
           </div>
-          <p className="text-red-500 text-sm mt-1">{errors.email?.message}</p>
+          <p className="text-red-500 text-sm mt-1">{errors.doctor?.message}</p>
         </div>
       </form>
 
