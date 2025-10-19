@@ -8,8 +8,8 @@ import Link from "next/link";
 export default async function LoginPage() {
   const session = await getServerSession(authOptions);
 
-  // Only redirect if we have a valid session with accessToken
-  if (session && session.user && session.accessToken) {
+  // Only redirect if we have a valid session with accessToken and user data
+  if (session && session.user && session.user.name && session.accessToken) {
     // User is already logged in, redirect (e.g., to dashboard)
     redirect('/dashboard');
   }

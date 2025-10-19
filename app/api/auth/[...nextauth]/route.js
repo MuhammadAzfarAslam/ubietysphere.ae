@@ -84,8 +84,11 @@ export const authOptions = {
       }
 
       // Check if the token has expired or is missing
-      if (!token.accessToken || token.invalid || (token.expiresAt && Date.now() > token.expiresAt)) {
-        console.log("🔑 Token expired or missing, marking as expired");
+      if (!token.accessToken || token.invalid) {
+        console.log("🔑 Token missing or invalid, marking as expired");
+        token.expired = true; // Mark as expired instead of returning null
+      } else if (token.expiresAt && Date.now() > token.expiresAt) {
+        console.log("🔑 Token expired, marking as expired");
         token.expired = true; // Mark as expired instead of returning null
       }
       
@@ -96,12 +99,9 @@ export const authOptions = {
 
       // Check if the token has expired, is missing, or is invalid
       if (!token || !token.accessToken || token.expired || token.invalid || (token.expiresAt && Date.now() > token.expiresAt)) {
-        console.log("📦 Session expired or missing token, returning empty session");
-        // Return an empty session object instead of null to avoid NextAuth errors
-        return {
-          user: null,
-          expires: new Date(0).toISOString()
-        };
+        console.log("📦 Session expired or missing token, returning null");
+        // Return null to clear the session completely
+        return null;
       }
 
       // Ensure session and user objects exist

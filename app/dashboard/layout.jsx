@@ -6,25 +6,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ToastProvider } from "@/components/toaster/ToastContext";
 
-const sideMenu = [
-  {
-    name: "General Info",
-    href: "/dashboard",
-    role: ["Doctor", "Patient", "Parent"],
-  },
-  { name: "Education", href: "/dashboard/education", role: ["Doctor"] },
-  { name: "License", href: "/dashboard/license", role: ["Doctor"] },
-  {
-    name: "My Documents",
-    href: "/dashboard/my-documents",
-    role: ["Patient", "Parent"],
-  },
-  {
-    name: "Shared Documents",
-    href: "/dashboard/shared-documents",
-    role: ["Doctor"],
-  },
-];
+
 
 const DashboardLayout = async ({ params, children }) => {
   const session = await getServerSession(authOptions);
@@ -32,13 +14,32 @@ const DashboardLayout = async ({ params, children }) => {
   console.log("📜 Session:", session);
 
   if (!session || session?.user?.role === undefined) {
-
     // Redirect to login
     redirect("/login");
   }
 
+  const sideMenu = [
+    {
+      name: session.user.role === "admin" ? "Doctor Applications" : "General Info",
+      href: "/dashboard",
+      role: ["Doctor", "Patient", "Parent", "admin"],
+    },
+    { name: "Education", href: "/dashboard/education", role: ["Doctor"] },
+    { name: "License", href: "/dashboard/license", role: ["Doctor"] },
+    {
+      name: "My Documents",
+      href: "/dashboard/my-documents",
+      role: ["Patient", "Parent"],
+    },
+    {
+      name: "Shared Documents",
+      href: "/dashboard/shared-documents",
+      role: ["Doctor"],
+    },
+  ];
+
   // Example: check role
-  if (!["Doctor", "Patient", "Parent"]?.includes(session.user.role)) {
+  if (!["Doctor", "Patient", "Parent", "admin"]?.includes(session.user.role)) {
     return <p>Unauthorized: Doctors only access</p>;
   }
   return (

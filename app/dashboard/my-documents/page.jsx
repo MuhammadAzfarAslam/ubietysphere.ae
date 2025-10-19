@@ -20,7 +20,7 @@ const MyDocuments = async () => {
     redirect("/login");
   }
   
-  if (!["Patient", "Parent", "Doctor"]?.includes(session.user.role)) {
+  if (!["Patient", "Parent", "Doctor", "admin"]?.includes(session.user.role)) {
     return <p>Unauthorized: {session.user.role} only</p>;
   }
 
