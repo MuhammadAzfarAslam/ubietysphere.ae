@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/components/toaster/ToastContext";
 import Modal from "@/components/modal/Modal";
+import { postData } from "@/utils/getData";
 
 const DoctorApplicationCard = ({
   id,
@@ -20,25 +21,24 @@ const DoctorApplicationCard = ({
   const { addToast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const acceptHandler = async (applicationId) => {
+  const sendInvitationHandler = async (applicantEmail) => {
     try {
-      // TODO: Replace with actual API endpoint for accepting applications
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/doctor-applications/${applicationId}/accept`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await postData(
+        "user/doctor-applications/registration-token",
+        { email: applicantEmail },
+        {
+          Authorization: `Bearer ${accessToken}`,
+        }
+      );
 
-      if (response.ok) {
-        addToast("Application accepted successfully!", "success");
+      if (response) {
+        addToast("Invitation has been sent successfully to the applicant", "success");
       } else {
-        addToast("Failed to accept application", "error");
+        addToast("Failed to send invitation", "error");
       }
     } catch (error) {
-      console.error("Error accepting application:", error);
-      addToast("Something went wrong while accepting the application", "error");
+      console.error("Error sending invitation:", error);
+      addToast("Something went wrong while sending the invitation", "error");
     }
   };
 
@@ -147,11 +147,11 @@ const DoctorApplicationCard = ({
           </svg>
         </button>
 
-        {/* Accept Button */}
+        {/* Send Invitation Button */}
         <button
           className="text-white cursor-pointer hover:text-green-300 transition-colors"
-          onClick={() => acceptHandler(id)}
-          title="Accept Application"
+          onClick={() => sendInvitationHandler(email)}
+          title="Send Invitation Link"
         >
           <svg
             width="24"
@@ -161,7 +161,7 @@ const DoctorApplicationCard = ({
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+              d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"
               fill="currentColor"
             />
           </svg>
