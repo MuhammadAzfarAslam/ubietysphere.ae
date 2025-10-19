@@ -105,15 +105,26 @@ export async function postData(
 
 export async function putData(url, body = {}, additionalHeaders = {}) {
   try {
-    const res = await fetch(`${BASEURL}${url}`, {
-      method: "PUT", // Corrected to 'method' instead of 'type'
+    // Check if body is FormData
+    const isFormData = body instanceof FormData;
+
+    const fetchOptions = {
+      method: "PUT",
       headers: {
-        "Content-Type": "application/json",
         Accept: "application/json",
         ...additionalHeaders,
       },
-      body: JSON.stringify(body),
-    });
+    };
+
+    // Only set Content-Type for JSON, let browser set it for FormData
+    if (!isFormData) {
+      fetchOptions.headers["Content-Type"] = "application/json";
+      fetchOptions.body = JSON.stringify(body);
+    } else {
+      fetchOptions.body = body;
+    }
+
+    const res = await fetch(`${BASEURL}${url}`, fetchOptions);
 
     if (res?.status === 401) {
       console.log("🚨 401 Unauthorized - Token expired or invalid, logging out");

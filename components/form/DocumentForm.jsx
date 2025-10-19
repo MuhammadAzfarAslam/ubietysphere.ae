@@ -8,35 +8,51 @@ import FormButton from "../button/FormButton";
 import { useToast } from "../toaster/ToastContext";
 import Link from "next/link";
 
-// Medical treatment categories
+// Medical document categories
 const medicalCategories = [
-  "X-Ray",
-  "MRI Scan",
-  "CT Scan",
-  "Ultrasound",
-  "Blood Test",
-  "Urine Test",
-  "ECG",
-  "Echocardiogram",
-  "Endoscopy",
-  "Colonoscopy",
-  "Biopsy",
-  "Pathology Report",
-  "Prescription",
-  "Medical Certificate",
-  "Discharge Summary",
-  "Lab Report",
-  "Vaccination Record",
-  "Allergy Test",
-  "Pregnancy Test",
-  "Other"
+  "Government-issued ID",
+  "Health insurance card or policy document",
+  "Clinical notes from previous consultations",
+  "Discharge summaries from hospitalizations",
+  "Current medication list and past prescriptions (last 6–12 months)",
+  "Recent diagnostic reports (blood, urine, radiology, etc.)",
+  "Allergy list (if any)",
+  "Vaccination records",
+  "Referral letter (if applicable)",
+  "Previous oncology consultation notes",
+  "Histopathology/biopsy reports",
+  "Imaging reports (MRI, PET, CT scans, etc.)",
+  "Tumor marker test results",
+  "Treatment protocols or chemotherapy schedules",
+  "Genetic/molecular profiling reports",
+  "Discharge summaries from oncology admissions",
+  "Current medication and allergy list",
+  "Mental health history or past psychological assessments",
+  "School behavior reports (for children/adolescents)",
+  "Completed mental health screening forms (if shared in advance)",
+  "Medication history (especially psychotropics)",
+  "Relevant personal history documents (trauma, family, education, etc.)",
+  "Sleep logs or mood tracking logs (if available)",
+  "Recent lab reports (blood glucose, lipid profile, thyroid tests, etc.)",
+  "Current weight and height or BMI data",
+  "Food journals or diet logs (3–7 days preferred)",
+  "Exercise or activity tracker data (if any)",
+  "Medication list (especially for metabolic or GI disorders)",
+  "Existing medical diagnoses or conditions (e.g., diabetes, PCOS, IBS)",
+  "Previous consultations with other dietitians (if any)",
+  "All previous clinical notes relevant to the condition",
+  "Recent and old diagnostic reports",
+  "Images (X-ray, CT, MRI, etc.) in DICOM or PDF format",
+  "Treatment history and medication regimen",
+  "Referral note or specific question for the second opinion",
+  "Family history forms (if genetic/hereditary condition suspected)",
+  "Patient's own symptom record or timeline of condition"
 ];
 
-// Define validation schema using Yup
+// Define validation schema using Yup (without file validation - handled separately)
 const schema = yup.object({
   title: yup.string().required("Title is required"),
   category: yup.string().required("Category is required"),
-  file: yup.mixed().required("File is required"),
 });
 
 const DocumentForm = ({
@@ -60,42 +76,33 @@ const DocumentForm = ({
     },
   });
 
-  const uploadDocument = async (file) => {
-    if (!file) return null;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await postData("user/reports/upload", formData, {
-        Authorization: `Bearer ${accessToken}`,
-      });
-      return response?.data?.id;
-    } catch (error) {
-      console.error("Upload failed:", error);
-      addToast("File upload failed!", "error");
-      return null;
-    }
-  };
-
   const onSubmit = async (formData) => {
     try {
-      let documentId = null;
+      // Get file from form data
+      const file = formData.file && formData.file[0];
 
-      // Always upload file - required for both add and edit
-      const file = formData.file[0]; // Get file from form data
-      documentId = await uploadDocument(file);
-      if (!documentId) {
-        addToast("File upload is required!", "error");
+      // Check if file is required (for new documents only)
+      if (!data?.id && !file) {
+        addToast("File upload is required for new documents!", "error");
         return;
       }
 
-      const payload = {
+      const dto = {
         title: formData.title,
         category: formData.category,
         userId: id,
-        ...(documentId && { documentId }),
       };
+
+      const payload = new FormData();
+      payload.append(
+        "dto",
+        new Blob([JSON.stringify(dto)], { type: "application/json" })
+      );
+
+      // Append file only if provided
+      if (file) {
+        payload.append("image", file);
+      }
 
       let response;
       if (data?.id) {
@@ -106,7 +113,7 @@ const DocumentForm = ({
         addToast("Document updated successfully!", "success");
       } else {
         // Create new document
-        response = await postData("user/reports", payload, {
+        response = await postData("user/reports/upload", payload, {
           Authorization: `Bearer ${accessToken}`,
         });
         addToast("Document added successfully!", "success");
@@ -155,9 +162,9 @@ const DocumentForm = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          File*
+          File{!data?.id && "*"}
         </label>
-        
+
         {/* Show current file when editing */}
         {data?.id && data?.fileName && (
           <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-sm">
@@ -173,9 +180,10 @@ const DocumentForm = ({
                 View File
               </Link>
             </div>
+            <p className="text-sm text-gray-500 mt-2">Upload a new file to replace the current one (optional)</p>
           </div>
         )}
-        
+
         <input
           type="file"
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
