@@ -33,7 +33,7 @@ const DoctorApplicationCard = ({
       );
 
       if (response) {
-        addToast("Invitation has been sent successfully to the applicant", "success");
+        addToast("Invitation has been sent successfully to the applicant", "success", false);
       } else {
         addToast("Failed to send invitation", "error");
       }

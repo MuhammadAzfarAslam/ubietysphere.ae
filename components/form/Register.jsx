@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { postData } from "@/utils/getData";
+import Link from "next/link";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -76,8 +77,7 @@ const Register = ({ role, token }) => {
           </svg>
         </div>
         <p className="text-lg">
-          You have registered successfully, Please check your email for
-          verification link.
+          You have registered successfully, {role === 'Doctor' ? <>Please <Link href={'/login'} className="font-semibold underline">Login</Link></> : 'Please check your email for verification link.'}
         </p>
       </div>
     );
