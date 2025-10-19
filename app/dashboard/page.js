@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import GeneralProfile from "@/components/upload/GeneralProfile";
 import { redirect } from "next/navigation";
-import DoctorApplicationCard from "@/components/list/DoctorApplicationCard";
+import DoctorApplications from "@/wrappers/DoctorApplications";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -41,37 +41,10 @@ export default async function DashboardPage() {
     return (
       <div className="space-y-6">
         {session?.user?.role === "admin" ? (
-          <>
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">Doctor Applications</h2>
-              <p className="text-gray-500">Review and manage doctor applications</p>
-            </div>
-            
-            {res?.data?.content && res.data.content.length > 0 ? (
-              <div className="space-y-4">
-                {res.data.content.map((application) => (
-                  <DoctorApplicationCard
-                    key={application.id}
-                    id={application.id}
-                    firstName={application.firstName}
-                    lastName={application.lastName}
-                    email={application.email}
-                    phone={application.phone}
-                    totalExperience={application.totalExperience}
-                    coverLetter={application.coverLetter}
-                    resumeFileName={application.resumeFileName}
-                    licenceFileName={application.licenceFileName}
-                    lastUpdate={application.lastUpdate}
-                    accessToken={session?.accessToken}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No doctor applications found.</p>
-              </div>
-            )}
-          </>
+          <DoctorApplications
+            initialData={res?.data}
+            accessToken={session?.accessToken}
+          />
         ) : (
           <>
             <div className="flex items-center space-x-4">

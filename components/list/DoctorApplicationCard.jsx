@@ -16,7 +16,8 @@ const DoctorApplicationCard = ({
   resumeFileName,
   licenceFileName,
   lastUpdate,
-  accessToken
+  accessToken,
+  onDelete
 }) => {
   const { addToast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,23 +45,25 @@ const DoctorApplicationCard = ({
 
   const rejectHandler = async (applicationId) => {
     try {
-      // TODO: Replace with actual API endpoint for rejecting applications
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/doctor-applications/${applicationId}/reject`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+      // Delete request to reject the application
+      await postData(
+        `user/doctor-applications/${applicationId}`,
+        null,
+        {
+          Authorization: `Bearer ${accessToken}`,
         },
-      });
+        "DELETE"
+      );
 
-      if (response.ok) {
-        addToast("Application rejected successfully!", "success");
-      } else {
-        addToast("Failed to reject application", "error");
+      addToast("Application deleted successfully!", "success", false);
+
+      // Call the onDelete callback to update the parent state
+      if (onDelete) {
+        onDelete(applicationId);
       }
     } catch (error) {
-      console.error("Error rejecting application:", error);
-      addToast("Something went wrong while rejecting the application", "error");
+      console.error("Error deleting application:", error);
+      addToast("Something went wrong while deleting the application", "error");
     }
   };
   return (

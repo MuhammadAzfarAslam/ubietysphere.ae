@@ -12,16 +12,18 @@ export const useToast = () => {
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (message, type = "info") => {
+  const addToast = (message, type = "info", autoDismiss = true) => {
     const newToast = { message, type, id: Date.now() };
     setToasts((prevToasts) => [...prevToasts, newToast]);
 
-    // Remove the toast after 3 seconds
-    setTimeout(() => {
-      setToasts((prevToasts) =>
-        prevToasts.filter((toast) => toast.id !== newToast.id)
-      );
-    }, 3000);
+    // Remove the toast after 3 seconds only if autoDismiss is true
+    if (autoDismiss) {
+      setTimeout(() => {
+        setToasts((prevToasts) =>
+          prevToasts.filter((toast) => toast.id !== newToast.id)
+        );
+      }, 3000);
+    }
   };
 
   return (
