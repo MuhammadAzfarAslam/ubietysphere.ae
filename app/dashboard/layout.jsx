@@ -26,6 +26,7 @@ const DashboardLayout = async ({ params, children }) => {
       role: ["Doctor", "Patient", "Parent", "admin"],
     },
     { name: "Education", href: "/dashboard/education", role: ["Doctor"] },
+    { name: "My Doctors", href: "/dashboard/doctors", role: ["admin"] },
     { name: "License", href: "/dashboard/license", role: ["Doctor"] },
     {
       name: "My Documents",
