@@ -1,50 +1,63 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import DoctorCard from "@/components/list/DoctorCard";
+import getData from "@/utils/getData";
 
 const DoctorsList = ({ initialData, accessToken }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [doctors, setDoctors] = useState(initialData?.content || []);
-  const [filteredDoctors, setFilteredDoctors] = useState(initialData?.content || []);
+  const [paginationData, setPaginationData] = useState({
+    page: initialData?.page ?? 0,
+    size: initialData?.size ?? 20,
+    totalElements: initialData?.totalElements ?? 0,
+    totalPages: initialData?.totalPages ?? 1,
+    first: initialData?.first ?? true,
+    last: initialData?.last ?? false,
+  });
   const [statusFilter, setStatusFilter] = useState("all");
   const [professionFilter, setProfessionFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 10;
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Get unique professions from doctors list
+  // Get unique professions from all doctors
   const professions = [...new Set(doctors.map(doctor => doctor.details?.category).filter(Boolean))];
 
-  // Apply filters
-  const applyFilters = (status, profession) => {
+  // Apply client-side filters
+  const getFilteredDoctors = () => {
     let filtered = [...doctors];
 
     // Filter by status
-    if (status !== "all") {
-      const isActive = status === "active";
+    if (statusFilter !== "all") {
+      const isActive = statusFilter === "active";
       filtered = filtered.filter(doctor => doctor.enabled === isActive);
     }
 
     // Filter by profession
-    if (profession !== "all") {
-      filtered = filtered.filter(doctor => doctor.details?.category === profession);
+    if (professionFilter !== "all") {
+      filtered = filtered.filter(doctor => doctor.details?.category === professionFilter);
     }
 
-    setFilteredDoctors(filtered);
-    setCurrentPage(0); // Reset to first page when filters change
+    return filtered;
   };
+
+  const filteredDoctors = getFilteredDoctors();
 
   const handleStatusChange = (status) => {
     setStatusFilter(status);
-    applyFilters(status, professionFilter);
   };
 
   const handleProfessionChange = (profession) => {
     setProfessionFilter(profession);
-    applyFilters(statusFilter, profession);
   };
 
   const handleDelete = (deletedId) => {
     setDoctors(prevDoctors => prevDoctors.filter(doc => doc.id !== deletedId));
-    setFilteredDoctors(prevDoctors => prevDoctors.filter(doc => doc.id !== deletedId));
+    setPaginationData(prev => ({
+      ...prev,
+      totalElements: prev.totalElements - 1
+    }));
   };
 
   const handleToggleStatus = (doctorId, newStatus) => {
@@ -53,22 +66,43 @@ const DoctorsList = ({ initialData, accessToken }) => {
         doc.id === doctorId ? { ...doc, enabled: newStatus } : doc
       )
     );
-    setFilteredDoctors(prevDoctors =>
-      prevDoctors.map(doc =>
-        doc.id === doctorId ? { ...doc, enabled: newStatus } : doc
-      )
-    );
   };
 
-  // Pagination
-  const totalPages = Math.ceil(filteredDoctors.length / itemsPerPage);
-  const startIndex = currentPage * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentDoctors = filteredDoctors.slice(startIndex, endIndex);
+  const goToPage = async (page) => {
+    if (page < 0 || page >= paginationData.totalPages || isLoading) {
+      return;
+    }
 
-  const goToPage = (page) => {
-    if (page >= 0 && page < totalPages) {
-      setCurrentPage(page);
+    setIsLoading(true);
+
+    // Update URL with page parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', page.toString());
+    router.push(`?${params.toString()}`);
+
+    try {
+      // Fetch data for the new page
+      const res = await getData(`user/doctors?page=${page}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (res?.data) {
+        setDoctors(res.data.content || []);
+        setPaginationData({
+          page: res.data.page ?? 0,
+          size: res.data.size ?? 20,
+          totalElements: res.data.totalElements ?? 0,
+          totalPages: res.data.totalPages ?? 1,
+          first: res.data.first ?? true,
+          last: res.data.last ?? false,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching page:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,10 +152,10 @@ const DoctorsList = ({ initialData, accessToken }) => {
       </div>
 
       {/* Doctors List */}
-      {currentDoctors.length > 0 ? (
+      {filteredDoctors.length > 0 ? (
         <>
           <div className="space-y-4">
-            {currentDoctors.map((doctor) => (
+            {filteredDoctors.map((doctor) => (
               <DoctorCard
                 key={doctor.id}
                 doctor={doctor}
@@ -132,32 +166,37 @@ const DoctorsList = ({ initialData, accessToken }) => {
             ))}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between">
+          {/* Pagination - Using API pagination data */}
+          {paginationData.totalPages > 1 && (
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-sm text-gray-600">
-                Showing {startIndex + 1} to {Math.min(endIndex, filteredDoctors.length)} of{" "}
-                {filteredDoctors.length} doctors
+                Showing {paginationData.page * paginationData.size + 1} to{" "}
+                {Math.min(
+                  (paginationData.page + 1) * paginationData.size,
+                  paginationData.totalElements
+                )}{" "}
+                of {paginationData.totalElements} doctors
               </div>
               <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 0}
+                  onClick={() => goToPage(paginationData.page - 1)}
+                  disabled={paginationData.first || isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Previous
+                  {isLoading ? "Loading..." : "Previous"}
                 </button>
 
                 <div className="flex space-x-1">
-                  {[...Array(totalPages)].map((_, index) => (
+                  {[...Array(paginationData.totalPages)].map((_, index) => (
                     <button
                       key={index}
                       onClick={() => goToPage(index)}
+                      disabled={isLoading}
                       className={`px-3 py-2 rounded-sm text-sm font-medium ${
-                        currentPage === index
+                        paginationData.page === index
                           ? "bg-primary text-white"
                           : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {index + 1}
                     </button>
@@ -165,11 +204,11 @@ const DoctorsList = ({ initialData, accessToken }) => {
                 </div>
 
                 <button
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages - 1}
+                  onClick={() => goToPage(paginationData.page + 1)}
+                  disabled={paginationData.last || isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Next
+                  {isLoading ? "Loading..." : "Next"}
                 </button>
               </div>
             </div>

@@ -183,6 +183,7 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Doctor Details"
+        maxWidth="max-w-3xl"
       >
         <div className="space-y-4">
           {/* Profile Image */}
@@ -322,6 +323,88 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
                     X (Twitter)
                   </Link>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Qualifications */}
+          {doctor.qualifications && doctor.qualifications.length > 0 && (
+            <div>
+              <label className="text-sm font-medium text-gray-600 mb-3 block">
+                Qualifications ({doctor.qualifications.length})
+              </label>
+              <div className="space-y-3">
+                {doctor.qualifications.map((qual) => (
+                  <div
+                    key={qual.id}
+                    className="p-3 bg-gray-50 rounded border border-gray-200"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold text-gray-800">
+                          {qual.degreeType} - {qual.fieldOfStudy}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {qual.institutionName}, {qual.country}
+                        </p>
+                      </div>
+                      {qual.imageName && (
+                        <Link
+                          href={`https://cms.ubietysphere.ae/img/user-reports/${qual.imageName}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                        >
+                          View Certificate
+                        </Link>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {qual.dateFrom} to {qual.dateTo}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Licenses */}
+          {doctor.licences && doctor.licences.length > 0 && (
+            <div>
+              <label className="text-sm font-medium text-gray-600 mb-3 block">
+                Licenses ({doctor.licences.length})
+              </label>
+              <div className="space-y-3">
+                {doctor.licences.map((license) => (
+                  <div
+                    key={license.id}
+                    className="p-3 bg-gray-50 rounded border border-gray-200"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold text-gray-800">
+                          {license.specialization}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {license.authority} - {license.licenceNumber}
+                        </p>
+                      </div>
+                      {license.imageName && (
+                        <Link
+                          href={`https://cms.ubietysphere.ae/img/user-reports/${license.imageName}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                        >
+                          View License
+                        </Link>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Valid: {license.validFrom} to {license.validTo}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
