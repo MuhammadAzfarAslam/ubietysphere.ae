@@ -361,7 +361,7 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
                       </div>
                       {qual.imageName && (
                         <Link
-                          href={`https://cms.ubietysphere.ae/img/user-reports/${qual.imageName}`}
+                          href={`https://cms.ubietysphere.ae/img/qualification-images/${qual.imageName}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-blue-600 hover:text-blue-800 underline"
@@ -402,7 +402,7 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
                       </div>
                       {license.imageName && (
                         <Link
-                          href={`https://cms.ubietysphere.ae/img/user-reports/${license.imageName}`}
+                          href={`https://cms.ubietysphere.ae/img/licence-images/${license.imageName}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-blue-600 hover:text-blue-800 underline"
