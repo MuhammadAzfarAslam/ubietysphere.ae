@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DoctorCard from "@/components/list/DoctorCard";
-import getData, { putData } from "@/utils/getData";
+import getData from "@/utils/getData";
 import { DOCTOR_CATEGORIES } from "@/utils/enums";
 
 const DoctorsList = ({ initialData, accessToken }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Initialize filters from URL params
   const [doctors, setDoctors] = useState(initialData?.content || []);
   const [paginationData, setPaginationData] = useState({
     page: initialData?.page ?? 0,
@@ -18,36 +19,74 @@ const DoctorsList = ({ initialData, accessToken }) => {
     first: initialData?.first ?? true,
     last: initialData?.last ?? false,
   });
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [professionFilter, setProfessionFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('active') ? (searchParams.get('active') === 'true' ? 'active' : 'inactive') : 'all');
+  const [professionFilter, setProfessionFilter] = useState(searchParams.get('profession') || 'all');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Apply client-side filters
-  const getFilteredDoctors = () => {
-    let filtered = [...doctors];
+  // Build API URL with query parameters
+  const buildApiUrl = (page = 0, status = statusFilter, profession = professionFilter) => {
+    const params = new URLSearchParams();
+    params.set('page', page.toString());
 
-    // Filter by status
-    if (statusFilter !== "all") {
-      const isActive = statusFilter === "active";
-      filtered = filtered.filter(doctor => doctor.enabled === isActive);
+    if (status !== 'all') {
+      params.set('active', status === 'active' ? 'true' : 'false');
     }
 
-    // Filter by profession
-    if (professionFilter !== "all") {
-      filtered = filtered.filter(doctor => doctor.details?.category === professionFilter);
+    if (profession !== 'all') {
+      params.set('profession', profession);
     }
 
-    return filtered;
+    return `user/doctors?${params.toString()}`;
   };
 
-  const filteredDoctors = getFilteredDoctors();
+  const fetchDoctors = async (page = 0, status = statusFilter, profession = professionFilter) => {
+    setIsLoading(true);
+
+    // Update URL
+    const urlParams = new URLSearchParams();
+    urlParams.set('page', page.toString());
+    if (status !== 'all') {
+      urlParams.set('active', status === 'active' ? 'true' : 'false');
+    }
+    if (profession !== 'all') {
+      urlParams.set('profession', profession);
+    }
+    router.push(`?${urlParams.toString()}`);
+
+    try {
+      const apiUrl = buildApiUrl(page, status, profession);
+      const res = await getData(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (res?.data) {
+        setDoctors(res.data.content || []);
+        setPaginationData({
+          page: res.data.page ?? 0,
+          size: res.data.size ?? 20,
+          totalElements: res.data.totalElements ?? 0,
+          totalPages: res.data.totalPages ?? 1,
+          first: res.data.first ?? true,
+          last: res.data.last ?? false,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleStatusChange = (status) => {
     setStatusFilter(status);
+    fetchDoctors(0, status, professionFilter); // Reset to page 0 when filter changes
   };
 
   const handleProfessionChange = (profession) => {
     setProfessionFilter(profession);
+    fetchDoctors(0, statusFilter, profession); // Reset to page 0 when filter changes
   };
 
   const handleDelete = (deletedId) => {
@@ -79,9 +118,9 @@ const DoctorsList = ({ initialData, accessToken }) => {
         role: doctor.role,
         active: newStatus
       };
-console.log('payload', payload);
+      console.log('payload', payload);
 
-      // Call the API
+      // TODO: Call the API when ready
       // await putData("user", payload, {
       //   Authorization: `Bearer ${accessToken}`
       // });
@@ -97,42 +136,11 @@ console.log('payload', payload);
     }
   };
 
-  const goToPage = async (page) => {
+  const goToPage = (page) => {
     if (page < 0 || page >= paginationData.totalPages || isLoading) {
       return;
     }
-
-    setIsLoading(true);
-
-    // Update URL with page parameter
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', page.toString());
-    router.push(`?${params.toString()}`);
-
-    try {
-      // Fetch data for the new page
-      const res = await getData(`user/doctors?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (res?.data) {
-        setDoctors(res.data.content || []);
-        setPaginationData({
-          page: res.data.page ?? 0,
-          size: res.data.size ?? 20,
-          totalElements: res.data.totalElements ?? 0,
-          totalPages: res.data.totalPages ?? 1,
-          first: res.data.first ?? true,
-          last: res.data.last ?? false,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching page:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    fetchDoctors(page, statusFilter, professionFilter);
   };
 
   return (
@@ -152,7 +160,8 @@ console.log('payload', payload);
           <select
             value={statusFilter}
             onChange={(e) => handleStatusChange(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
+            disabled={isLoading}
+            className="w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -168,7 +177,8 @@ console.log('payload', payload);
           <select
             value={professionFilter}
             onChange={(e) => handleProfessionChange(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
+            disabled={isLoading}
+            className="w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="all">All Professions</option>
             {DOCTOR_CATEGORIES.map((category) => (
@@ -181,10 +191,14 @@ console.log('payload', payload);
       </div>
 
       {/* Doctors List */}
-      {filteredDoctors.length > 0 ? (
+      {isLoading ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Loading doctors...</p>
+        </div>
+      ) : doctors.length > 0 ? (
         <>
           <div className="space-y-4">
-            {filteredDoctors.map((doctor) => (
+            {doctors.map((doctor) => (
               <DoctorCard
                 key={doctor.id}
                 doctor={doctor}

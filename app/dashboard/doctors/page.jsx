@@ -5,7 +5,7 @@ import getData from "@/utils/getData";
 import { redirect } from "next/navigation";
 import DoctorsList from "@/wrappers/DoctorsList";
 
-const MyDoctors = async () => {
+const MyDoctors = async ({ searchParams }) => {
   const session = await getServerSession(authOptions);
 
   if (!["admin"]?.includes(session.user.role)) {
@@ -13,7 +13,25 @@ const MyDoctors = async () => {
   }
 
   try {
-    const res = await getData("user/doctors", {
+    // Get query params
+    const params = await searchParams;
+    const page = params?.page || '0';
+    const active = params?.active;
+    const profession = params?.profession;
+
+    // Build API URL with query parameters
+    const apiParams = new URLSearchParams();
+    apiParams.set('page', page);
+    if (active) {
+      apiParams.set('active', active);
+    }
+    if (profession) {
+      apiParams.set('profession', profession);
+    }
+
+    const apiUrl = `user/doctors?${apiParams.toString()}`;
+
+    const res = await getData(apiUrl, {
       headers: {
         Authorization: `Bearer ${session?.accessToken}`,
       },
