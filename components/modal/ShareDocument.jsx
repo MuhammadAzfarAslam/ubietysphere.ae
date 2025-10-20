@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -17,9 +17,18 @@ const schema = yup.object({
 });
 
 const ShareDocument = ({ isOpen, onClose, documentData }) => {
-  const [sharedEmails, setSharedEmails] = useState([]);
+  const [sharedUsers, setSharedUsers] = useState([]);
   const { addToast } = useToast();
   const { data: session } = useSession();
+
+  // Initialize with existing sharedWith data from the document
+  useEffect(() => {
+    if (documentData?.sharedWith) {
+      setSharedUsers(documentData.sharedWith);
+    } else {
+      setSharedUsers([]);
+    }
+  }, [documentData]);
   
   const {
     register,
@@ -57,12 +66,13 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
       );
 
       if (response) {
-        // Add to shared emails list for display
+        // Add to shared users list for display
+        // Assume the API returns the shared user info, or use the input for now
         const newEntry = {
-          id: Date.now(),
-          email: data.doctor,
+          id: Date.now(), // Temporary ID until we get the real one from API
+          name: data.doctor, // This will show the email/ID until page refresh when we get actual name
         };
-        setSharedEmails([...sharedEmails, newEntry]);
+        setSharedUsers([...sharedUsers, newEntry]);
 
         addToast("Document shared successfully!", "success");
         reset();
@@ -73,16 +83,16 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
     }
   };
 
-  const removeEmail = (emailId) => {
+  const removeUser = (userId) => {
     try {
-      // TODO: API call to remove email access
-      console.log("Removing email access:", emailId);
-      
-      setSharedEmails(sharedEmails.filter(email => email.id !== emailId));
-      addToast("Email access removed!", "success");
+      // TODO: API call to remove user access
+      console.log("Removing user access:", userId);
+
+      setSharedUsers(sharedUsers.filter(user => user.id !== userId));
+      addToast("User access removed!", "success");
     } catch (error) {
       console.error("Remove failed:", error);
-      addToast("Failed to remove email access!", "error");
+      addToast("Failed to remove user access!", "error");
     }
   };
 
@@ -122,21 +132,21 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
         </div>
       </form>
 
-      {/* Shared Emails List */}
-      {sharedEmails.length > 0 && (
+      {/* Shared Users List */}
+      {sharedUsers.length > 0 && (
         <div className="mt-6">
           <h3 className="text-sm font-medium text-gray-700 mb-3">
             Shared with:
           </h3>
           <div className="space-y-2">
-            {sharedEmails.map((email) => (
+            {sharedUsers.map((user) => (
               <div
-                key={email.id}
+                key={user.id}
                 className="flex items-center justify-between p-3 bg-gray-50 rounded-sm"
               >
-                <span className="text-sm text-gray-800">{email.email}</span>
+                <span className="text-sm text-gray-800">{user.name}</span>
                 <button
-                  onClick={() => removeEmail(email.id)}
+                  onClick={() => removeUser(user.id)}
                   className="text-red-500 hover:text-red-700 cursor-pointer"
                   title="Remove access"
                 >
