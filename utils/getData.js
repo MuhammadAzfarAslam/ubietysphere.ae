@@ -17,7 +17,7 @@ export default async function getData(url, additional = {}) {
       console.log("🚨 401 Unauthorized - Token expired or invalid, logging out");
       // Only call signOut if we're on the client side
       if (typeof window !== "undefined") {
-        signOut({ callbackUrl: "/login" });
+        signOut({ callbackUrl: "/login?expired=true", redirect: true });
       }
       throw new Error("401 Unauthorized - Session expired");
     } else if (res?.status === 201 || res?.status === 200 || res?.ok) {
@@ -40,7 +40,7 @@ export default async function getData(url, additional = {}) {
   } catch (error) {
     console.error("Error:", error);
     if (error.message.includes("401") && typeof window !== "undefined") {
-      signOut({ callbackUrl: "/login" });
+      signOut({ callbackUrl: "/login?expired=true", redirect: true });
     }
     throw error; // Re-throw the error to propagate it
   }
@@ -74,6 +74,15 @@ export async function postData(
 
     const res = await fetch(`${BASEURL}${url}`, fetchOptions);
 
+    if (res?.status === 401) {
+      console.log("🚨 401 Unauthorized - Token expired or invalid, logging out");
+      // Only call signOut if we're on the client side
+      if (typeof window !== "undefined") {
+        signOut({ callbackUrl: "/login?expired=true", redirect: true });
+      }
+      throw new Error("401 Unauthorized - Session expired");
+    }
+
     if (type === "DELETE" && res?.status === 200) {
       return;
     }
@@ -99,6 +108,9 @@ export async function postData(
     return res.json();
   } catch (error) {
     console.error("Error:", error);
+    if (error.message.includes("401") && typeof window !== "undefined") {
+      signOut({ callbackUrl: "/login?expired=true", redirect: true });
+    }
     throw error; // Re-throw the error to propagate it
   }
 }
@@ -130,7 +142,7 @@ export async function putData(url, body = {}, additionalHeaders = {}) {
       console.log("🚨 401 Unauthorized - Token expired or invalid, logging out");
       // Only call signOut if we're on the client side
       if (typeof window !== "undefined") {
-        signOut({ callbackUrl: "/login" });
+        signOut({ callbackUrl: "/login?expired=true", redirect: true });
       }
       throw new Error("401 Unauthorized - Session expired");
     } else if (res?.status === 201 || res?.status === 200 || res?.ok) {
@@ -152,6 +164,9 @@ export async function putData(url, body = {}, additionalHeaders = {}) {
     return res.json();
   } catch (error) {
     console.error("Error:", error);
+    if (error.message.includes("401") && typeof window !== "undefined") {
+      signOut({ callbackUrl: "/login?expired=true", redirect: true });
+    }
     throw error; // Re-throw the error to propagate it
   }
 }

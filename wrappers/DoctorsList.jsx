@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DoctorCard from "@/components/list/DoctorCard";
-import getData from "@/utils/getData";
+import getData, { putData } from "@/utils/getData";
 import { DOCTOR_CATEGORIES } from "@/utils/enums";
 
 const DoctorsList = ({ initialData, accessToken }) => {
@@ -58,12 +58,43 @@ const DoctorsList = ({ initialData, accessToken }) => {
     }));
   };
 
-  const handleToggleStatus = (doctorId, newStatus) => {
-    setDoctors(prevDoctors =>
-      prevDoctors.map(doc =>
-        doc.id === doctorId ? { ...doc, enabled: newStatus } : doc
-      )
-    );
+  const handleToggleStatus = async (doctorId, newStatus) => {
+    try {
+      // Find the doctor object
+      const doctor = doctors.find(doc => doc.id === doctorId);
+
+      if (!doctor) return;
+
+      // Prepare the payload with the complete doctor object
+      const payload = {
+        id: doctor.id,
+        lastUpdate: doctor.lastUpdate,
+        firstName: doctor.firstName,
+        lastName: doctor.lastName,
+        dateOfBirth: doctor.dateOfBirth,
+        gender: doctor.gender,
+        email: doctor.email,
+        mobileNumber: doctor.mobileNumber,
+        enabled: doctor.enabled,
+        role: doctor.role,
+        active: newStatus
+      };
+console.log('payload', payload);
+
+      // Call the API
+      // await putData("user", payload, {
+      //   Authorization: `Bearer ${accessToken}`
+      // });
+
+      // Update local state
+      setDoctors(prevDoctors =>
+        prevDoctors.map(doc =>
+          doc.id === doctorId ? { ...doc, active: newStatus } : doc
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling doctor status:", error);
+    }
   };
 
   const goToPage = async (page) => {

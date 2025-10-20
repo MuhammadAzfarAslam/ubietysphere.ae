@@ -14,9 +14,16 @@ const DashboardLayout = async ({ params, children }) => {
 
   console.log("📜 Session:", session);
 
-  if (!session || session?.user?.role === undefined) {
-    // Redirect to login
-    redirect("/login");
+  // Check if session exists and has required data
+  if (!session || !session.user || !session.user.role) {
+    console.log("🚨 Invalid session data, redirecting to login");
+    redirect("/login?expired=true");
+  }
+
+  // Check if accessToken exists
+  if (!session.accessToken || session.accessToken === "") {
+    console.log("🚨 No accessToken found in session, redirecting to login");
+    redirect("/login?expired=true");
   }
 
   const sideMenu = [

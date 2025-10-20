@@ -4,6 +4,7 @@ import React from "react";
 
 const SharedDocuments = async () => {
   const session = await getServerSession(authOptions);
+
   if (session.user.role !== "Doctor") {
     return <p>Unauthorized: Doctors only</p>;
   }

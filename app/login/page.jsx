@@ -4,18 +4,24 @@ import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import Link from "next/link";
+import SessionCleaner from "@/components/auth/SessionCleaner";
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }) {
   const session = await getServerSession(authOptions);
+  const { expired } = await searchParams;
 
   // Only redirect if we have a valid session with accessToken and user data
-  if (session && session.user && session.user.name && session.accessToken) {
+  // AND the user is not coming from a 401/expired token redirect
+  if (session && session.user && session.user.name && session.accessToken && !expired) {
     // User is already logged in, redirect (e.g., to dashboard)
     redirect('/dashboard');
   }
 
   return (
     <div className="bg-secondary lg:py-8 relative lg:h-[calc(100vh-100px)]">
+      {/* Clear session if expired parameter is present */}
+      <SessionCleaner shouldClear={!!expired} />
+
       <div className="absolute inset-0 bg-white opacity-90 pointer-events-none"></div>
       <div className="max-w-7xl mx-auto lg:px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="lg:flex">
@@ -32,6 +38,11 @@ export default async function LoginPage() {
             <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
               Login
             </h2>
+            {expired && (
+              <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded text-sm text-center">
+                Your session has expired. Please log in again.
+              </div>
+            )}
             <Login />
 
             <div className="mt-4 text-center">

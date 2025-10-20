@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/components/toaster/ToastContext";
 import Modal from "@/components/modal/Modal";
-import { postData, putData } from "@/utils/getData";
+import { postData } from "@/utils/getData";
 
 const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
   const { addToast } = useToast();
@@ -11,28 +11,39 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
   const [isEnabled, setIsEnabled] = useState(doctor.enabled);
 
   const handleToggle = async () => {
-    try {
-      const newStatus = !isEnabled;
+    const newStatus = !isEnabled;
 
-      // Update doctor status via API
-      await putData(
-        `user/${doctor.id}/status`,
-        { enabled: newStatus },
-        {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      );
+    // Prepare the payload with the complete doctor object
+    const payload = {
+      id: doctor.id,
+      lastUpdate: doctor.lastUpdate,
+      firstName: doctor.firstName,
+      lastName: doctor.lastName,
+      dateOfBirth: doctor.dateOfBirth,
+      gender: doctor.gender,
+      email: doctor.email,
+      mobileNumber: doctor.mobileNumber,
+      enabled: doctor.enabled,
+      role: doctor.role,
+      active: newStatus
+    };
 
-      setIsEnabled(newStatus);
-      onToggleStatus(doctor.id, newStatus);
-      addToast(
-        `Doctor ${newStatus ? "activated" : "deactivated"} successfully!`,
-        "success"
-      );
-    } catch (error) {
-      console.error("Error toggling doctor status:", error);
-      addToast("Failed to update doctor status", "error");
-    }
+    console.log("=== TOGGLE STATUS TEST ===");
+    console.log("Endpoint:", "user");
+    console.log("Method:", "PUT");
+    console.log("Payload:", payload);
+    console.log("Full doctor object:", doctor);
+    console.log("=========================");
+
+    // TODO: API call disabled for testing
+    // await putData("user", payload, { Authorization: `Bearer ${accessToken}` });
+
+    setIsEnabled(newStatus);
+    onToggleStatus(doctor.id, newStatus);
+    addToast(
+      `Doctor ${newStatus ? "activated" : "deactivated"} successfully! (Test mode - API not called)`,
+      "success"
+    );
   };
 
   const handleDelete = async () => {
