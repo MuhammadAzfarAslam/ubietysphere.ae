@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DoctorCard from "@/components/list/DoctorCard";
-import getData, { putData } from "@/utils/getData";
+import getData, { putData, postData } from "@/utils/getData";
 import { DOCTOR_CATEGORIES } from "@/utils/enums";
 import { useToast } from "@/components/toaster/ToastContext";
 
@@ -35,7 +35,7 @@ const DoctorsList = ({ initialData, accessToken }) => {
     }
 
     if (profession !== 'all') {
-      params.set('profession', profession);
+      params.set('profession', profession.toLowerCase());
     }
 
     return `user/doctors?${params.toString()}`;
@@ -51,7 +51,7 @@ const DoctorsList = ({ initialData, accessToken }) => {
       urlParams.set('active', status === 'active' ? 'true' : 'false');
     }
     if (profession !== 'all') {
-      urlParams.set('profession', profession);
+      urlParams.set('profession', profession.toLowerCase());
     }
     router.push(`?${urlParams.toString()}`);
 
@@ -91,12 +91,30 @@ const DoctorsList = ({ initialData, accessToken }) => {
     fetchDoctors(0, statusFilter, profession); // Reset to page 0 when filter changes
   };
 
-  const handleDelete = (deletedId) => {
-    setDoctors(prevDoctors => prevDoctors.filter(doc => doc.id !== deletedId));
-    setPaginationData(prev => ({
-      ...prev,
-      totalElements: prev.totalElements - 1
-    }));
+  const handleDelete = async (deletedId) => {
+    try {
+      // Call the DELETE API
+      await postData(
+        `user/${deletedId}`,
+        null,
+        {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        "DELETE"
+      );
+
+      // Update local state after successful deletion
+      setDoctors(prevDoctors => prevDoctors.filter(doc => doc.id !== deletedId));
+      setPaginationData(prev => ({
+        ...prev,
+        totalElements: prev.totalElements - 1
+      }));
+
+      addToast("Doctor deleted successfully!", "success", false);
+    } catch (error) {
+      console.error("Error deleting doctor:", error);
+      addToast("Failed to delete doctor", "error");
+    }
   };
 
   const handleToggleStatus = async (doctorId, newStatus) => {
@@ -209,7 +227,6 @@ const DoctorsList = ({ initialData, accessToken }) => {
               <DoctorCard
                 key={doctor.id}
                 doctor={doctor}
-                accessToken={accessToken}
                 onDelete={handleDelete}
                 onToggleStatus={handleToggleStatus}
               />

@@ -1,13 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { useToast } from "@/components/toaster/ToastContext";
 import Modal from "@/components/modal/Modal";
-import { postData } from "@/utils/getData";
 
-const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
-  const { addToast } = useToast();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const DoctorCard = ({ doctor, onDelete, onToggleStatus }) => {
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleToggle = async () => {
     const newStatus = !doctor.active;
@@ -16,27 +15,18 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
     onToggleStatus(doctor.id, newStatus);
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this doctor?")) {
-      return;
-    }
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
 
-    try {
-      await postData(
-        `user/${doctor.id}`,
-        null,
-        {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        "DELETE"
-      );
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    setIsDeleteModalOpen(false);
 
-      addToast("Doctor deleted successfully!", "success", false);
-      onDelete(doctor.id);
-    } catch (error) {
-      console.error("Error deleting doctor:", error);
-      addToast("Failed to delete doctor", "error");
-    }
+    // Call parent handler which will make the API call
+    await onDelete(doctor.id);
+
+    setIsDeleting(false);
   };
 
   return (
@@ -97,7 +87,7 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
         {/* View Button */}
         <button
           className="text-white cursor-pointer hover:text-blue-300 transition-colors"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsViewModalOpen(true)}
           title="View Details"
         >
           <svg
@@ -141,7 +131,7 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
         {/* Delete Button */}
         <button
           className="text-white cursor-pointer hover:text-red-300 transition-colors"
-          onClick={handleDelete}
+          onClick={handleDeleteClick}
           title="Delete Doctor"
         >
           <svg
@@ -161,8 +151,8 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
 
       {/* View Details Modal */}
       <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
         title="Doctor Details"
         maxWidth="max-w-3xl"
       >
@@ -404,6 +394,69 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
                 {doctor.enabled ? "Active" : "Inactive"}
               </span>
             </p>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Doctor"
+      >
+        <div className="space-y-4">
+          {/* Warning Icon */}
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+              <svg
+                className="w-10 h-10 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Confirmation Message */}
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              Are you sure you want to delete this doctor?
+            </h3>
+            <p className="text-gray-600 mb-4">
+              <span className="font-medium">
+                {doctor.firstName} {doctor.lastName}
+              </span>
+              <br />
+              <span className="text-sm">{doctor.email}</span>
+            </p>
+            <p className="text-sm text-red-600">
+              This action cannot be undone. All associated data will be permanently removed.
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              onClick={() => setIsDeleteModalOpen(false)}
+              disabled={isDeleting}
+              className="px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className="px-4 py-2 bg-red-600 text-white rounded-sm text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDeleting ? "Deleting..." : "Delete Doctor"}
+            </button>
           </div>
         </div>
       </Modal>

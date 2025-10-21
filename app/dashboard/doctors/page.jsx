@@ -26,7 +26,7 @@ const MyDoctors = async ({ searchParams }) => {
       apiParams.set('active', active);
     }
     if (profession) {
-      apiParams.set('profession', profession);
+      apiParams.set('profession', profession.toLowerCase());
     }
 
     const apiUrl = `user/doctors?${apiParams.toString()}`;
