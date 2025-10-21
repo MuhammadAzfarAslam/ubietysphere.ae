@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import VerifyEmail from "@/components/form/VerifyEmail";
 
 const VerifyEmailPage = async () => {
@@ -11,8 +11,9 @@ const VerifyEmailPage = async () => {
     >
       <div className="max-w-7xl w-full mx-auto lg:px-4 sm:px-6 lg:px-8 px-4 relative z-10">
         <div className="w-full backdrop-blur-[20px] shadow-lg py-8 lg:px-20 px-4 flex flex-col justify-center inset-0">
-          
-          <VerifyEmail />
+          <Suspense fallback={<div className="text-center text-white">Loading...</div>}>
+            <VerifyEmail />
+          </Suspense>
         </div>
       </div>
     </div>

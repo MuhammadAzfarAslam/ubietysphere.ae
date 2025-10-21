@@ -1,6 +1,4 @@
-"use client";
 import React from "react";
-import { useSearchParams } from "next/navigation";
 
 const imageExtensions = [
   "jpg",
@@ -23,15 +21,28 @@ function getFileExtension(url) {
   return url.split(".").pop().split(/\#|\?/)[0];
 }
 
-const page = () => {
-  const searchParams = useSearchParams();
+const PreviewPage = async ({ searchParams }) => {
+  const params = await searchParams;
+  const url = params?.url;
 
-  const url = searchParams.get("url"); // ?id=123 → "123"
+  if (!url) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No file to preview</p>
+      </div>
+    );
+  }
+
   const type = getFileExtension(url);
+
   return (
     <div className="text-center">
       {imageExtensions?.includes(type) && (
-        <img src={`https://cms.ubietysphere.ae/${url}`} />
+        <img
+          src={`https://cms.ubietysphere.ae/${url}`}
+          alt="Preview"
+          className="max-w-full h-auto mx-auto"
+        />
       )}
 
       {type === "pdf" && (
@@ -40,10 +51,17 @@ const page = () => {
           width="100%"
           height="600px"
           style={{ border: 'none' }}
+          title="PDF Preview"
         ></iframe>
+      )}
+
+      {!imageExtensions?.includes(type) && type !== "pdf" && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Unsupported file type: {type}</p>
+        </div>
       )}
     </div>
   );
 };
 
-export default page;
+export default PreviewPage;

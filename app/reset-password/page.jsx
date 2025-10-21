@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ResetPassword from "@/components/form/ResetPassword";
 
 const ResetPasswordPage = async () => {
@@ -14,7 +14,9 @@ const ResetPasswordPage = async () => {
           <h2 className="text-2xl font-semibold text-white text-center mb-6">
             Reset Password
           </h2>
-          <ResetPassword />
+          <Suspense fallback={<div className="text-center text-white">Loading...</div>}>
+            <ResetPassword />
+          </Suspense>
         </div>
       </div>
     </div>

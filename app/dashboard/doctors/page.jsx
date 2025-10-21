@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import getData from "@/utils/getData";
@@ -41,10 +41,12 @@ const MyDoctors = async ({ searchParams }) => {
 
     return (
       <div>
-        <DoctorsList
-          initialData={res?.data}
-          accessToken={session?.accessToken}
-        />
+        <Suspense fallback={<div className="text-center py-8"><p className="text-gray-500">Loading doctors...</p></div>}>
+          <DoctorsList
+            initialData={res?.data}
+            accessToken={session?.accessToken}
+          />
+        </Suspense>
       </div>
     );
   } catch (error) {
