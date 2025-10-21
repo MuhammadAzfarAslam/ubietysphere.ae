@@ -70,7 +70,7 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
         // Assume the API returns the shared user info, or use the input for now
         const newEntry = {
           id: Date.now(), // Temporary ID until we get the real one from API
-          name: data.doctor, // This will show the email/ID until page refresh when we get actual name
+          doctorEmail: data.doctor, // This will show the email/ID until page refresh when we get actual info
         };
         setSharedUsers([...sharedUsers, newEntry]);
 
@@ -83,11 +83,19 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
     }
   };
 
-  const removeUser = (userId) => {
+  const removeUser = async (userId) => {
     try {
-      // TODO: API call to remove user access
-      console.log("Removing user access:", userId);
+      // Call the DELETE API to remove user access
+      await postData(
+        `user/reports/share/${userId}`,
+        null,
+        {
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+        "DELETE"
+      );
 
+      // Update local state after successful deletion
       setSharedUsers(sharedUsers.filter(user => user.id !== userId));
       addToast("User access removed!", "success");
     } catch (error) {
@@ -144,7 +152,7 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
                 key={user.id}
                 className="flex items-center justify-between p-3 bg-gray-50 rounded-sm"
               >
-                <span className="text-sm text-gray-800">{user.name}</span>
+                <span className="text-sm text-gray-800">{user.doctorEmail}</span>
                 <button
                   onClick={() => removeUser(user.id)}
                   className="text-red-500 hover:text-red-700 cursor-pointer"
