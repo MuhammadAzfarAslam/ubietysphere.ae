@@ -2,12 +2,14 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DoctorCard from "@/components/list/DoctorCard";
-import getData from "@/utils/getData";
+import getData, { putData } from "@/utils/getData";
 import { DOCTOR_CATEGORIES } from "@/utils/enums";
+import { useToast } from "@/components/toaster/ToastContext";
 
 const DoctorsList = ({ initialData, accessToken }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { addToast } = useToast();
 
   // Initialize filters from URL params
   const [doctors, setDoctors] = useState(initialData?.content || []);
@@ -118,12 +120,11 @@ const DoctorsList = ({ initialData, accessToken }) => {
         role: doctor.role,
         active: newStatus
       };
-      console.log('payload', payload);
 
-      // TODO: Call the API when ready
-      // await putData("user", payload, {
-      //   Authorization: `Bearer ${accessToken}`
-      // });
+      // Call the API
+      await putData("user", payload, {
+        Authorization: `Bearer ${accessToken}`
+      });
 
       // Update local state
       setDoctors(prevDoctors =>
@@ -131,8 +132,14 @@ const DoctorsList = ({ initialData, accessToken }) => {
           doc.id === doctorId ? { ...doc, active: newStatus } : doc
         )
       );
+
+      addToast(
+        `Doctor ${newStatus ? "activated" : "deactivated"} successfully!`,
+        "success"
+      );
     } catch (error) {
       console.error("Error toggling doctor status:", error);
+      addToast("Failed to update doctor status", "error");
     }
   };
 

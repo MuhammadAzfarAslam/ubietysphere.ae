@@ -8,42 +8,12 @@ import { postData } from "@/utils/getData";
 const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
   const { addToast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(doctor.enabled);
 
   const handleToggle = async () => {
-    const newStatus = !isEnabled;
+    const newStatus = !doctor.active;
 
-    // Prepare the payload with the complete doctor object
-    const payload = {
-      id: doctor.id,
-      lastUpdate: doctor.lastUpdate,
-      firstName: doctor.firstName,
-      lastName: doctor.lastName,
-      dateOfBirth: doctor.dateOfBirth,
-      gender: doctor.gender,
-      email: doctor.email,
-      mobileNumber: doctor.mobileNumber,
-      enabled: doctor.enabled,
-      role: doctor.role,
-      active: newStatus
-    };
-
-    console.log("=== TOGGLE STATUS TEST ===");
-    console.log("Endpoint:", "user");
-    console.log("Method:", "PUT");
-    console.log("Payload:", payload);
-    console.log("Full doctor object:", doctor);
-    console.log("=========================");
-
-    // TODO: API call disabled for testing
-    // await putData("user", payload, { Authorization: `Bearer ${accessToken}` });
-
-    setIsEnabled(newStatus);
+    // Call parent handler which will make the API call
     onToggleStatus(doctor.id, newStatus);
-    addToast(
-      `Doctor ${newStatus ? "activated" : "deactivated"} successfully! (Test mode - API not called)`,
-      "success"
-    );
   };
 
   const handleDelete = async () => {
@@ -112,12 +82,12 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
         <div className="min-w-[80px]">
           <span
             className={`px-3 py-1 rounded-full text-xs font-medium ${
-              isEnabled
+              doctor.active
                 ? "bg-green-500 text-white"
                 : "bg-red-500 text-white"
             }`}
           >
-            {isEnabled ? "Active" : "Inactive"}
+            {doctor.active ? "Active" : "Inactive"}
           </span>
         </div>
       </div>
@@ -148,11 +118,11 @@ const DoctorCard = ({ doctor, accessToken, onDelete, onToggleStatus }) => {
         <button
           onClick={handleToggle}
           className={`cursor-pointer transition-colors ${
-            isEnabled
+            doctor.active
               ? "text-green-400 hover:text-green-300"
               : "text-gray-400 hover:text-gray-300"
           }`}
-          title={isEnabled ? "Deactivate" : "Activate"}
+          title={doctor.active ? "Deactivate" : "Activate"}
         >
           <svg
             width="24"
