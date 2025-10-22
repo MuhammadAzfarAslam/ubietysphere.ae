@@ -28,7 +28,7 @@ const useTokenValidation = () => {
     // Check if user is authenticated but has no accessToken
     if (status === "authenticated" && (!session?.accessToken || session?.accessToken === "")) {
       console.log("🚨 No accessToken found, logging out user");
-      signOut({ callbackUrl: "/login" });
+      signOut({ callbackUrl: "/login?expired=true" });
       return;
     }
 
@@ -44,14 +44,14 @@ const useTokenValidation = () => {
           // Check if token is expired (with 5 minute buffer)
           if (payload.exp && payload.exp < currentTime + 300) {
             console.log("🚨 AccessToken expired, logging out user");
-            signOut({ callbackUrl: "/login" });
+            signOut({ callbackUrl: "/login?expired=true" });
             return;
           }
         }
       } catch (error) {
         console.error("Error validating token:", error);
         console.log("🚨 Invalid token format, logging out user");
-        signOut({ callbackUrl: "/login" });
+        signOut({ callbackUrl: "/login?expired=true" });
         return;
       }
     }
