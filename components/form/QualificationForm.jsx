@@ -99,23 +99,30 @@ const QualificationForm = ({
           }
         );
         educationId = data?.id;
-        addToast("Record has been updated!", "success");
       } else {
         // ADD mode
-        await postData(`user/qualifications`, payload, {
+        const response = await postData(`user/qualifications`, payload, {
           Authorization: `Bearer ${accessToken}`,
         });
-
-        educationId = response?.data?.id; // Make sure API returns created license ID
-        await uploadEducationImage(licenseId);
-        addToast("Record has been added!", "success");
+        educationId = response?.data?.id; // Get the created education ID from response
       }
 
-      if (educationId) {
+      // Upload image if there's an educationId and a file
+      if (educationId && formData.file && formData.file[0]) {
         await uploadEducationImage(educationId);
       }
-      setIsOpen(false);
+
+      // Refresh data first
       await refreshCall();
+
+      // Show success message after everything completes
+      addToast(
+        data?.id ? "Record has been updated!" : "Record has been added!",
+        "success"
+      );
+
+      // Close modal
+      setIsOpen(false);
     } catch (error) {
       console.error("Update failed:", error);
       addToast("Something went wrong!", "error");
