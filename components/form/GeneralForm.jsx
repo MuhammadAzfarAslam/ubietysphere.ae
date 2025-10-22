@@ -75,6 +75,7 @@ const GeneralForm = ({ data, accessToken }) => {
       email: formData.email,
       mobileNumber: formData.mobileNumber,
       role: data?.role, // keep same
+      active: data?.active, // keep same
       details: {
         middleName1: null,
         middleName2: null,
