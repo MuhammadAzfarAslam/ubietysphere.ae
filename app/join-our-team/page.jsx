@@ -16,7 +16,7 @@ const ContactPage = () => {
         <div className="flex flex-col md:flex-row items-center gap-8 max-w-7xl mx-auto">
           {/* <div className="w-full md:w-2/5">
             <Image
-              src={"https://ubietysphere.ae/assets/images/contact.jpg"}
+              src={`${process.env.NEXT_PUBLIC_URL}assets/images/contact.jpg`}
               height={300}
               width={500}
               alt="contact image"

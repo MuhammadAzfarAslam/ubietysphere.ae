@@ -52,7 +52,7 @@ const ExpertDetailPage = async ({ params }) => {
                   imageURL={
                     imageName !== null
                       ? `https://cms.ubietysphere.ae/img/user-images/${imageName}`
-                      : "https://ubietysphere.ae/assets/images/placeholder-user.png"
+                      : `${process.env.NEXT_PUBLIC_URL}assets/images/placeholder-user.png`
                   }
                 />
               )

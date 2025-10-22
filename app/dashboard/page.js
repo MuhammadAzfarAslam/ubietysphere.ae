@@ -43,7 +43,7 @@ export default async function DashboardPage() {
                 preValue={
                   res?.data?.imageName !== null
                     ? `https://cms.ubietysphere.ae/img/user-images/${res?.data?.imageName}`
-                    : "https://ubietysphere.ae/assets/images/placeholder-user.png"
+                    : `${process.env.NEXT_PUBLIC_URL}assets/images/placeholder-user.png`
                 }
               />
               <div>

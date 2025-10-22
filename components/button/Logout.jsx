@@ -4,9 +4,7 @@ import { signOut } from "next-auth/react";
 
 const Logout = () => {
   const handleLogout = () => {
-    // Get the current origin (works in both dev and production)
-    const baseUrl = window.location.origin;
-    signOut({ callbackUrl: `${baseUrl}/` });
+    signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_URL}` });
   };
 
   return (

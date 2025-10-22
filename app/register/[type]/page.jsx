@@ -12,7 +12,7 @@ const RegisterPage = async ({ params, searchParams }) => {
     <div
       className="lg:py-8 relative lg:min-h-[calc(100vh-98px)] bg-cover bg-top flex items-center justify-center"
       style={{
-        backgroundImage: "url(https://ubietysphere.ae/assets/images/asclepius.jpeg)",
+        backgroundImage: `url(${process.env.NEXT_PUBLIC_URL}assets/images/asclepius.jpeg)`,
       }}
     >
       <div className="max-w-7xl w-full mx-auto lg:px-4 sm:px-6 lg:px-8 relative z-10">
