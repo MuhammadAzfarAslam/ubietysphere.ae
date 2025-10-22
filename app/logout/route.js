@@ -10,5 +10,5 @@ export async function GET() {
   });
 
   // Redirect to login
-  return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_APP_URL));
+  return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_URL));
 }
