@@ -9,29 +9,31 @@ import NationalitySelect from "./NationalitySelect";
 import CategorySelect from "./CategorySelect";
 import { useToast } from "../toaster/ToastContext";
 
-// Define validation schema using Yup
-const schema = yup.object({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
-  dateOfBirth: yup.string().required("Date of birth is required"),
-  gender: yup.string().required("Gender is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
-  mobileNumber: yup
-    .number()
-    .typeError("Must be a number")
-    .required("Mobile number is required"),
-  address: yup.string(),
-  nationality: yup.string().required("Nationality is required"),
-  category: yup.string().required("Category is required"),
-  totalExperience: yup.string(),
-  workDays: yup.array().of(yup.string()),
-  x: yup.string().nullable(),
-  instagram: yup.string().nullable(),
-  linkedin: yup.string().nullable(),
-  facebook: yup.string().nullable(),
-});
-
 const GeneralForm = ({ data, accessToken }) => {
+  // Define validation schema dynamically based on user role
+  const schema = yup.object({
+    firstName: yup.string().required("First name is required"),
+    lastName: yup.string().required("Last name is required"),
+    dateOfBirth: yup.string().required("Date of birth is required"),
+    gender: yup.string().required("Gender is required"),
+    email: yup.string().email("Invalid email").required("Email is required"),
+    mobileNumber: yup
+      .number()
+      .typeError("Must be a number")
+      .required("Mobile number is required"),
+    address: yup.string(),
+    nationality: yup.string().required("Nationality is required"),
+    // Category is only required for Doctors
+    ...(data?.role === "Doctor" && {
+      category: yup.string().required("Category is required"),
+      totalExperience: yup.string(),
+      workDays: yup.array().of(yup.string()),
+    }),
+    x: yup.string().nullable(),
+    instagram: yup.string().nullable(),
+    linkedin: yup.string().nullable(),
+    facebook: yup.string().nullable(),
+  });
   const { addToast } = useToast();
   const {
     register,
@@ -50,21 +52,49 @@ const GeneralForm = ({ data, accessToken }) => {
       nationality: data?.details?.nationality || "",
       nationalId: data?.details?.nationalId || "",
       passportNumber: data?.details?.passportNumber || "",
-      category: data?.details?.category || "",
       bio: data?.details?.bio || "",
-      totalExperience: data?.details?.totalExperience || "",
-      workDays: data?.details?.workDays || [],
       x: data?.details?.socialMediaUrls?.x || "",
       instagram: data?.details?.socialMediaUrls?.instagram || "",
       linkedin: data?.details?.socialMediaUrls?.linkedin || "",
       facebook: data?.details?.socialMediaUrls?.facebook || "",
+      // Only include doctor-specific fields for Doctors
+      ...(data?.role === "Doctor" && {
+        category: data?.details?.category || "",
+        totalExperience: data?.details?.totalExperience || "",
+        workDays: data?.details?.workDays || [],
+      }),
     },
   });
 
   const onSubmit = async (formData) => {
+    console.log("Form submitted with data:", formData);
     const formattedDate = new Date(formData.dateOfBirth)
       .toISOString()
       .split("T")[0];
+
+    // Build details object based on role
+    const details = {
+      middleName1: null,
+      middleName2: null,
+      address: formData.address,
+      nationality: formData.nationality,
+      nationalId: Number(formData.nationalId),
+      passportNumber: formData.passportNumber,
+      bio: formData.bio,
+      socialMediaUrls: {
+        x: formData.x || "",
+        instagram: formData.instagram || "",
+        linkedin: formData.linkedin || "",
+        facebook: formData.facebook || "",
+      },
+    };
+
+    // Only include doctor-specific fields for Doctors
+    if (data?.role === "Doctor") {
+      details.category = formData.category;
+      details.totalExperience = Number(formData.totalExperience);
+      details.workDays = formData.workDays || [];
+    }
 
     const payload = {
       id: data?.id, // original user id
@@ -76,24 +106,7 @@ const GeneralForm = ({ data, accessToken }) => {
       mobileNumber: formData.mobileNumber,
       role: data?.role, // keep same
       active: data?.active, // keep same
-      details: {
-        middleName1: null,
-        middleName2: null,
-        address: formData.address,
-        nationality: formData.nationality,
-        nationalId: Number(formData.nationalId),
-        passportNumber: formData.passportNumber,
-        category: formData.category,
-        bio: formData.bio,
-        totalExperience: Number(formData.totalExperience), // always numeric
-        workDays: formData.workDays || [],
-        socialMediaUrls: {
-          x: formData.x || "",
-          instagram: formData.instagram || "",
-          linkedin: formData.linkedin || "",
-          facebook: formData.facebook || "",
-        },
-      },
+      details,
     };
 
     console.log("Update payload:", payload);
@@ -129,8 +142,12 @@ const GeneralForm = ({ data, accessToken }) => {
     "Sunday",
   ];
 
+  const onError = (errors) => {
+    console.log("Form validation errors:", errors);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label
@@ -280,6 +297,7 @@ const GeneralForm = ({ data, accessToken }) => {
           <NationalitySelect
             register={register}
             defaultValue={data?.details?.nationality || ""}
+            name="nationality"
           />
           <p className="text-red-500 text-sm">{errors.nationality?.message}</p>
         </div>

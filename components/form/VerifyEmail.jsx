@@ -35,7 +35,7 @@ const VerifyEmail = () => {
   const verifyCall = async (token) => {
     const res = await getData(`verify-email?token=${token}`);
     console.log("res", res);
-    
+
     if (res.status === 200) {
       setisLoading(false);
       setIsOkay(true);
@@ -94,8 +94,8 @@ const VerifyEmail = () => {
           </svg>
         </div>
         <p className="text-lg">
-          Your email has been verified successfully, please click{" "}
-          <Link href={"/login"}>here</Link> to login.
+          Your email has been verified successfully,{" "}
+          <Link className="underline" href={"/login"}>please click here to login</Link>.
         </p>
       </div>
     );
