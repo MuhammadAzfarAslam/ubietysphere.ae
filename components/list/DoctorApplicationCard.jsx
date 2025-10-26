@@ -281,7 +281,7 @@ const DoctorApplicationCard = ({
             <div className="mt-2 flex justify-between  space-y-2">
               {resumeFileName ? (
                 <Link
-                  href={`https://cms.ubietysphere.ae/img/user-reports/${resumeFileName}`}
+                  href={`https://cms.ubietysphere.ae/img/doctor-application/${resumeFileName}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-blue-600 hover:text-blue-800 underline"
@@ -293,7 +293,7 @@ const DoctorApplicationCard = ({
               )}
               {licenceFileName ? (
                 <Link
-                  href={`https://cms.ubietysphere.ae/img/user-reports/${licenceFileName}`}
+                  href={`https://cms.ubietysphere.ae/img/doctor-application/${licenceFileName}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-blue-600 hover:text-blue-800 underline"
