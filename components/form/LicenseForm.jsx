@@ -7,6 +7,7 @@ import { postData, putData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
 import { useToast } from "../toaster/ToastContext";
 import Link from "next/link";
+import DatePicker from "./DatePicker";
 
 // Validation schema
 const schema = yup.object({
@@ -31,6 +32,7 @@ const LicenseForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -166,10 +168,14 @@ const LicenseForm = ({
           <label className="block text-sm font-medium text-light">
             Valid From
           </label>
-          <input
-            type="date"
-            {...register("validFrom")}
-            className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
+          <DatePicker
+            register={register}
+            setValue={setValue}
+            name="validFrom"
+            error={errors.validFrom}
+            defaultValue={data?.validFrom}
+            placeholder="DD-MMM-YYYY"
+            inputClassName="text-primary-light focus:border-0"
           />
           <p className="text-red-500 text-sm">{errors.validFrom?.message}</p>
         </div>
@@ -178,10 +184,14 @@ const LicenseForm = ({
           <label className="block text-sm font-medium text-light">
             Valid To
           </label>
-          <input
-            type="date"
-            {...register("validTo")}
-            className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
+          <DatePicker
+            register={register}
+            setValue={setValue}
+            name="validTo"
+            error={errors.validTo}
+            defaultValue={data?.validTo}
+            placeholder="DD-MMM-YYYY"
+            inputClassName="text-primary-light focus:border-0"
           />
           <p className="text-red-500 text-sm">{errors.validTo?.message}</p>
         </div>

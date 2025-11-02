@@ -9,6 +9,7 @@ import NationalitySelect from "./NationalitySelect";
 import DegreeSelect from "./DegreeSelect";
 import { useToast } from "../toaster/ToastContext";
 import Link from "next/link";
+import DatePicker from "./DatePicker";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -34,6 +35,7 @@ const QualificationForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -202,12 +204,14 @@ const QualificationForm = ({
           >
             Start Date
           </label>
-          <input
-            type="date"
-            id="startDate"
+          <DatePicker
+            register={register}
+            setValue={setValue}
             name="startDate"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
-            {...register("startDate")}
+            error={errors.startDate}
+            defaultValue={data?.dateFrom}
+            placeholder="DD-MMM-YYYY"
+            inputClassName="text-primary-light focus:border-0"
           />
           <p className="text-red-500 text-sm">
             {errors.startDate && errors.startDate.message}
@@ -221,12 +225,14 @@ const QualificationForm = ({
           >
             End Date
           </label>
-          <input
-            type="date"
-            id="endDate"
+          <DatePicker
+            register={register}
+            setValue={setValue}
             name="endDate"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
-            {...register("endDate")}
+            error={errors.endDate}
+            defaultValue={data?.dateTo}
+            placeholder="DD-MMM-YYYY"
+            inputClassName="text-primary-light focus:border-0"
           />
           <p className="text-red-500 text-sm">
             {errors.endDate && errors.endDate.message}

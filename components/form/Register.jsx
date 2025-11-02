@@ -6,6 +6,7 @@ import * as yup from "yup";
 import { postData } from "@/utils/getData";
 import Link from "next/link";
 import PhoneInput from "./PhoneInput";
+import DatePicker from "./DatePicker";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -179,12 +180,13 @@ const Register = ({ role, token }) => {
           >
             Date of Birth
           </label>
-          <input
-            type="date"
-            id="dateOfBirth"
+          <DatePicker
+            register={register}
+            setValue={setValue}
             name="dateOfBirth"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
-            {...register("dateOfBirth")}
+            error={errors.dateOfBirth}
+            placeholder="DD-MMM-YYYY"
+            inputClassName="text-white focus:border-0"
           />
           <p className="text-red-500 text-sm">
             {errors.dateOfBirth && errors.dateOfBirth.message}

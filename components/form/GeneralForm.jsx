@@ -9,6 +9,7 @@ import NationalitySelect from "./NationalitySelect";
 import CategorySelect from "./CategorySelect";
 import { useToast } from "../toaster/ToastContext";
 import PhoneInput from "./PhoneInput";
+import DatePicker from "./DatePicker";
 
 const GeneralForm = ({ data, accessToken }) => {
   // Define validation schema dynamically based on user role
@@ -239,12 +240,14 @@ const GeneralForm = ({ data, accessToken }) => {
           >
             Date of Birth
           </label>
-          <input
-            type="date"
-            id="dateOfBirth"
+          <DatePicker
+            register={register}
+            setValue={setValue}
             name="dateOfBirth"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
-            {...register("dateOfBirth")}
+            error={errors.dateOfBirth}
+            defaultValue={data?.dateOfBirth}
+            placeholder="DD-MMM-YYYY"
+            inputClassName="text-primary-light focus:border-0"
           />
           <p className="text-red-500 text-sm">
             {errors.dateOfBirth && errors.dateOfBirth.message}

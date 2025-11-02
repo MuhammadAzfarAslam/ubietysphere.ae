@@ -123,7 +123,7 @@ const ShareDocument = ({ isOpen, onClose, documentData }) => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Share with Doctor
+            Share with HCP
           </label>
           <div className="flex gap-2">
             <input
