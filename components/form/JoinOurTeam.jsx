@@ -6,6 +6,8 @@ import * as yup from "yup";
 import { postData } from "@/utils/getData";
 import FormButton from "../button/FormButton";
 import { useToast } from "../toaster/ToastContext";
+import CategorySelect from "./CategorySelect";
+import PhoneInput from "./PhoneInput";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -19,6 +21,7 @@ const schema = yup.object({
     .string()
     .required("Phone number is required")
     .matches(/^[0-9+\-\s()]+$/, "Please enter a valid phone number"),
+  discipline: yup.string().required("Please select a discipline"),
   totalExperience: yup
     .number()
     .required("Total years of experience is required")
@@ -64,7 +67,8 @@ const JoinOurTeam = () => {
       totalExperience: parseInt(data.totalExperience),
       phone: data.phone,
       coverLetter: data.coverLetter,
-      email: data.email
+      email: data.email,
+      discipline: data.discipline
     };
     
     console.log("DTO object:", dto);
@@ -170,7 +174,7 @@ const JoinOurTeam = () => {
         </div>
       </div>
 
-      {/* Second Row: Email and Phone */}
+      {/* Second Row: Email and Mobile Number */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Email */}
         <div>
@@ -193,8 +197,6 @@ const JoinOurTeam = () => {
           </p>
         </div>
 
-        //Add Here CategorySelect
-
         {/* Phone */}
         <div>
           <label
@@ -203,13 +205,13 @@ const JoinOurTeam = () => {
           >
             Mobile Number*
           </label>
-          <input
-            type="tel"
-            id="phone"
+          <PhoneInput
+            register={register}
+            setValue={setValue}
             name="phone"
-            placeholder="Enter your phone number"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            {...register("phone")}
+            error={errors.phone}
+            defaultCountryCode="AE"
+            placeholder="Enter phone number"
           />
           <p className="text-red-500 text-sm">
             {errors.phone && errors.phone.message} &nbsp;
@@ -217,8 +219,27 @@ const JoinOurTeam = () => {
         </div>
       </div>
 
-      {/* Third Row: Total Years of Experience and Resume Upload */}
+      {/* Third Row: Discipline and Total Years of Experience */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Discipline */}
+        <div>
+          <label
+            htmlFor="discipline"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Which discipline are you applying for*
+          </label>
+          <CategorySelect
+            register={register}
+            defaultValue=""
+            name="discipline"
+          />
+          <p className="text-red-500 text-sm">
+            {errors.discipline && errors.discipline.message} &nbsp;
+          </p>
+        </div>
+
+        {/* Total Years of Experience */}
         <div>
           <label
             htmlFor="totalExperience"
@@ -240,42 +261,41 @@ const JoinOurTeam = () => {
             {errors.totalExperience && errors.totalExperience.message} &nbsp;
           </p>
         </div>
+      </div>
 
+      {/* Fourth Row: Resume and License Upload */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Resume Upload */}
         <div>
-          <label className="block text-sm font-medium text-light">
+          <label className="block text-sm font-medium text-gray-700">
             Resume*
           </label>
           <input
             type="file"
             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
             onChange={(e) => handleResumeChange(e.target.files[0])}
-            className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-gray-700"
           />
           <p className="text-red-500 text-sm">
             {errors.resume && errors.resume.message} &nbsp;
           </p>
         </div>
-      </div>
 
-      {/* Fourth Row: License Upload and empty space */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* License Upload */}
         <div>
-          <label className="block text-sm font-medium text-light">
+          <label className="block text-sm font-medium text-gray-700">
             License*
           </label>
           <input
             type="file"
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={(e) => handleLicenseChange(e.target.files[0])}
-            className="mt-1 block w-full p-3 border rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-primary-light"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary text-gray-700"
           />
           <p className="text-red-500 text-sm">
             {errors.license && errors.license.message} &nbsp;
           </p>
         </div>
-        <div></div>
       </div>
 
       {/* Cover Letter Row */}

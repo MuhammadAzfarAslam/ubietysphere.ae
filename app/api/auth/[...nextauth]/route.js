@@ -99,9 +99,12 @@ export const authOptions = {
 
       // Check if the token has expired, is missing, or is invalid
       if (!token || !token.accessToken || token.expired || token.invalid || (token.expiresAt && Date.now() > token.expiresAt)) {
-        console.log("📦 Session expired or missing token, returning null");
-        // Return null to clear the session completely
-        return null;
+        console.log("📦 Session expired or missing token");
+        // Return a minimal session object instead of null to prevent errors
+        return {
+          user: {},
+          expires: new Date(0).toISOString() // Set to epoch to indicate expired
+        };
       }
 
       // Ensure session and user objects exist
@@ -130,9 +133,6 @@ export const authOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-
-  // Add explicit URL configuration for production
-  url: process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_URL,
 };
 
 const handler = NextAuth(authOptions);
