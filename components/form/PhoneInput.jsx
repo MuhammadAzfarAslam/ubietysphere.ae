@@ -90,7 +90,8 @@ export default function PhoneInput({
   error,
   defaultCountryCode = "AE",
   placeholder = "Enter phone number",
-  setValue
+  setValue,
+  inputClassName = ""
 }) {
   const [selectedCountry, setSelectedCountry] = useState(
     countries.find(c => c.code === defaultCountryCode) || countries[0]
@@ -124,7 +125,7 @@ export default function PhoneInput({
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="h-full px-3 py-3 bg-gray-50 border border-r-0 border-gray-300 rounded-l-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-2"
+            className="px-3 py-[0.75rem] bg-gray-50 border border-r-0 border-gray-300 rounded-l-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-2"
           >
             <span className="text-2xl">{selectedCountry.flag}</span>
             <span className="text-sm font-medium text-gray-700">{selectedCountry.dialCode}</span>
@@ -175,7 +176,7 @@ export default function PhoneInput({
           placeholder={placeholder}
           value={phoneNumber}
           onChange={handlePhoneChange}
-          className="flex-1 block w-full p-3 border border-gray-300 rounded-r-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className={`flex-1 block w-full p-3 border border-gray-300 rounded-r-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary ${inputClassName}`}
         />
       </div>
 

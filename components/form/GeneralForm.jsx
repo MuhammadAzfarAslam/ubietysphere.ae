@@ -8,6 +8,7 @@ import FormButton from "../button/FormButton";
 import NationalitySelect from "./NationalitySelect";
 import CategorySelect from "./CategorySelect";
 import { useToast } from "../toaster/ToastContext";
+import PhoneInput from "./PhoneInput";
 
 const GeneralForm = ({ data, accessToken }) => {
   // Define validation schema dynamically based on user role
@@ -39,6 +40,7 @@ const GeneralForm = ({ data, accessToken }) => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -216,13 +218,14 @@ const GeneralForm = ({ data, accessToken }) => {
           >
             Mobile Number
           </label>
-          <input
-            type="text"
-            id="mobileNumber"
+          <PhoneInput
+            register={register}
+            setValue={setValue}
             name="mobileNumber"
+            error={errors.mobileNumber}
+            defaultCountryCode="AE"
             placeholder="Enter mobile number"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-primary-light"
-            {...register("mobileNumber")}
+            inputClassName="text-primary-light focus:border-0"
           />
           <p className="text-red-500 text-sm">
             {errors.mobileNumber && errors.mobileNumber.message}
