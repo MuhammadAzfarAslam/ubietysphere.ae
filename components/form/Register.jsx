@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { postData } from "@/utils/getData";
 import Link from "next/link";
+import PhoneInput from "./PhoneInput";
 
 // Define validation schema using Yup
 const schema = yup.object({
@@ -34,6 +35,7 @@ const Register = ({ role, token }) => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
@@ -155,13 +157,13 @@ const Register = ({ role, token }) => {
           >
             Mobile Number
           </label>
-          <input
-            type="text"
-            id="mobileNumber"
+          <PhoneInput
+            register={register}
+            setValue={setValue}
             name="mobileNumber"
+            error={errors.mobileNumber}
+            defaultCountryCode="AE"
             placeholder="Enter mobile number"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:border-0 focus:ring-2 focus:ring-primary text-white"
-            {...register("mobileNumber")}
           />
           <p className="text-red-500 text-sm">
             {errors.mobileNumber && errors.mobileNumber.message}
