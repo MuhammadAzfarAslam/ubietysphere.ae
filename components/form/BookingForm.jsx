@@ -177,7 +177,7 @@ const BookingForm = ({ doctorName = null }) => {
       {/* Message */}
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Your Message*
+          Your health complaint (150)*
         </label>
         <textarea
           rows="4"

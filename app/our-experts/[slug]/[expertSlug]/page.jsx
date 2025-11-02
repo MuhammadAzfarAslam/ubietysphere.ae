@@ -122,7 +122,7 @@ const ExpertDetailPage = async ({ params }) => {
 
   return (
     <>
-      <Breadcrumb title={`${slugToTitle(slug)} Details`}>
+      <Breadcrumb title={`${slugToTitle(slug)} Profile`}>
         <span>/</span>
         <span className="text-primary-light font-medium capitalize">
           <Link href={`/out-expers/${slug}`}>{slugToTitle(slug)}</Link>
@@ -218,12 +218,12 @@ const ExpertDetailPage = async ({ params }) => {
                 <p className="text-gray-500 uppercase text-sm">Email</p>
                 <p className="font-medium text-primary">{content?.email}</p>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-gray-500 uppercase text-sm">Phone</p>
                 <p className="font-medium text-primary">
                   {content?.mobileNumber}
                 </p>
-              </div>
+              </div> */}
               <div>
                 <p className="text-gray-500 uppercase text-sm">From</p>
                 <p className="font-medium text-primary">
@@ -236,7 +236,7 @@ const ExpertDetailPage = async ({ params }) => {
           {/* Experience */}
           <div>
             <h2 className="text-xl font-semibold text-primary-light mb-0">
-              Experience
+              Qualifications & Experiences
             </h2>
             <div className="grid grid-cols-1 text-primary">
               {content?.qualifications?.map((item) => (
