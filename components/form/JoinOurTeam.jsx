@@ -193,13 +193,15 @@ const JoinOurTeam = () => {
           </p>
         </div>
 
+        //Add Here CategorySelect
+
         {/* Phone */}
         <div>
           <label
             htmlFor="phone"
             className="block text-sm font-medium text-gray-700"
           >
-            Phone Number*
+            Mobile Number*
           </label>
           <input
             type="tel"

@@ -7,9 +7,9 @@ import JoinOurTeamWrapper from "@/components/form/JoinOurTeamWrapper";
 const ContactPage = () => {
   return (
     <>
-      <Breadcrumb title="Join Our Team">
+      <Breadcrumb title="Join our panel of health care professionals">
         <span>/</span>
-        <span className="text-primary-light font-medium">Join Our Team</span>
+        <span className="text-primary-light font-medium">Join Our HCP</span>
       </Breadcrumb>
 
       <section className="contact-form relative bg-white py-16 px-3">
