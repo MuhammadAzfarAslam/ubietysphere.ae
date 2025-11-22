@@ -1,0 +1,100 @@
+upstream nextjs_app {
+    server 127.0.0.1:3000;  # Next.js
+}
+
+server {
+    server_name ubietysphere.ae www.ubietysphere.ae;
+
+     # Handle Next.js image optimization for local assets
+    location ~* ^/_next/image {
+        # Check if it's requesting local assets from /assets/images/
+        if ($args ~ "^url=%2Fassets%2Fimages%2F(.+?)&") {
+            set $image_path $1;
+            rewrite ^ /assets/images/$image_path last;
+        }
+
+        # Check if it's requesting local assets from /_next/static/media/
+        if ($args ~ "^url=%2F_next%2Fstatic%2Fmedia%2F(.+?)&") {
+            set $media_path $1;
+            rewrite ^ /_next/static/media/$media_path last;
+        }
+
+        # If no local asset match, pass to Next.js
+        add_header 'Access-Control-Allow-Origin' '*';
+        proxy_pass http://nextjs_app;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+
+    # Next.js reverse proxy
+    location / {
+        proxy_pass http://nextjs_app;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+
+    # Serve static assets (images and SVG)
+    location ^~ /assets/ {
+        alias /var/www/ubietysphere.ae/public/assets/;
+        #expires 1y;
+        add_header Cache-Control "public, max-age=31536000";
+            try_files $uri =404;
+    }
+
+
+    # Serve static assets from the public directory
+    location ^~ /_next/static/ {
+        alias /var/www/ubietysphere.ae/.next/static/;
+       # try_files $uri $uri/ @fallback;
+            add_header Cache-Control "public, max-age=31536000";
+    }
+
+    access_log /var/log/nginx/ubietysphere.ae_access.log;
+    error_log /var/log/nginx/ubietysphere.ae_error.log;
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/ubietysphere.ae/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/ubietysphere.ae/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+# Redirect www to non-www
+server {
+    if ($host = www.ubietysphere.ae) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name www.ubietysphere.ae;
+
+    # Redirect www to non-www
+    return 301 http://ubietysphere.ae$request_uri;
+
+
+}
+
+
+
+server {
+    if ($host = ubietysphere.ae) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name ubietysphere.ae www.ubietysphere.ae;
+    return 404; # managed by Certbot
+
+
+}
