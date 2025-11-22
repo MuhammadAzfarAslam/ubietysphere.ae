@@ -1,8 +1,22 @@
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb";
 import TeamCard from "@/components/cards/TeamCard";
 import React from "react";
+import { DOCTOR_CATEGORIES } from "@/utils/enums";
+import { SERVICE_CONTENT } from "@/utils/serviceContent";
 
-const ServiceDetailPage = () => {
+const ServiceDetailPage = ({ params }) => {
+  // Get slug from params
+  const slug = params.slug;
+
+  // Get service content by slug
+  const serviceContent = SERVICE_CONTENT[slug] || {
+    slug: slug,
+    title: DOCTOR_CATEGORIES.find(
+      (category) => category.toLowerCase().replace(/\s+/g, "-") === slug
+    ) || "Our Service",
+    bannerText: "Professional healthcare services tailored to your needs.",
+  };
+
   return (
     <>
       <div className="min-h-screen">
@@ -12,18 +26,16 @@ const ServiceDetailPage = () => {
             className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage:
-                'url("/@fs/home/runner/workspace/attached_assets/generated_images/Healthcare_consultation_hero_image_8d79a63b.png")',
+                'url("/assets/images/service.png")',
             }}
           ></div>
           <div className="absolute inset-0 bg-black opacity-70"></div>
           <div className="relative max-w-3xl mx-auto text-center px-2 lg:px-16 py-16">
             <h1 className="text-4xl md:text-5xl font-semibold text-secondary mb-6">
-              Nutrition & Dietetics Counseling
+              {serviceContent.title}
             </h1>
             <p className="text-lg md:text-xl text-white mb-8 max-w-2xl mx-auto">
-              Personalized nutrition guidance to help you achieve your health
-              goals. Our expert nutritionists create customized meal plans
-              tailored to your unique needs and lifestyle.
+              {serviceContent.bannerText}
             </p>
             <button className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-sm shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition">
               <span className="relative z-10 group-hover:text-primary">
@@ -43,7 +55,7 @@ const ServiceDetailPage = () => {
                 Why Choose Us
               </p>
               <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
-                Service Benefits
+                {serviceContent.title} Benefits
               </h2>
               <p className="text-base text-gray-700 mb-6 max-w-2xl mx-auto">
                 Discover how our professional services can help you achieve
@@ -335,10 +347,10 @@ const ServiceDetailPage = () => {
           <div className="relative max-w-7xl mx-auto text-center px-2 lg:px-16">
             <p className="text-sm font-bold text-primary mb-2">Team Members</p>
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
-              Meet Our Nutrition Experts
+              Meet Our {serviceContent.title} Experts
             </h2>
             <p className="text-base text-gray-700 mb-6 max-w-2xl mx-auto">
-              Our team of certified nutritionists and dietetic counselors are
+              Our team of certified {serviceContent.title.toLowerCase()} professionals are
               here to guide you on your wellness journey with personalized care
               and expert knowledge.
             </p>

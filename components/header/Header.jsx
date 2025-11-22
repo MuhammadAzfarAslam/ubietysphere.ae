@@ -219,17 +219,18 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <nav className="block relative w-full max-w-screen px-4 py-2 mx-auto bg-white bg-opacity-90 sticky top-3 shadow lg:px-8 backdrop-blur-lg backdrop-saturate-150 z-[990]">
+      <nav className="block relative w-full max-w-screen px-4 py-0 mx-auto bg-white bg-opacity-90 sticky top-3 shadow lg:px-8 backdrop-blur-lg backdrop-saturate-150 z-[990]">
         <div className="container flex flex-wrap items-center justify-between max-w-7xl mx-auto text-slate-800">
           <Link
             href="/"
             className="mr-4 block cursor-pointer py-1.5 text-red-600 font-bold text-2xl"
           >
             <Image
-              src={"/assets/svg/logo.svg"}
+              src={"/assets/images/logo.png"}
               width={100}
               height={50}
               alt="Logo"
+              className="max-h-[70px] w-auto"
             />
           </Link>
 
