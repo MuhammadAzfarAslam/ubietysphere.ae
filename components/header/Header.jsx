@@ -3,43 +3,35 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { DOCTOR_CATEGORIES } from "@/utils/enums";
 
 const menu = [
   { name: "Home", href: "/" },
   {
     name: "Our Services",
     href: "/our-services",
-    children: [
-      { name: "Physician", href: "/our-services/physician" },
-      { name: "Nurse", href: "/our-services/nurse" },
-      { name: "Dentist", href: "/our-services/dentist" },
-      { name: "Optometrist", href: "/our-services/optometrist" },
-      { name: "Audiometrist", href: "/our-services/audiometrist" },
-      { name: "Physiotherapist", href: "/our-services/physiotherapist" },
-      { name: "Psychologist", href: "/our-services/psychologist" },
-      { name: "Nutritionist", href: "/our-services/nutritionist" },
-      { name: "Navigator", href: "/our-services/navigator" },
-      { name: "Support", href: "/our-services/support" },
-      { name: "Other", href: "/our-services/other" },
-    ],
+    children: DOCTOR_CATEGORIES.map((category) => ({
+      name: category,
+      href: `/our-services/${category.toLowerCase().replace(/\s+/g, "-")}`,
+    })),
   },
-  {
-    name: "Our Experts",
-    href: "/our-experts",
-    children: [
-      { name: "Physician", href: "/our-experts/physician" },
-      { name: "Nurse", href: "/our-experts/nurse" },
-      { name: "Dentist", href: "/our-experts/dentist" },
-      { name: "Optometrist", href: "/our-experts/optometrist" },
-      { name: "Audiometrist", href: "/our-experts/audiometrist" },
-      { name: "Physiotherapist", href: "/our-experts/physiotherapist" },
-      { name: "Psychologist", href: "/our-experts/psychologist" },
-      { name: "Nutritionist", href: "/our-experts/nutritionist" },
-      { name: "Navigator", href: "/our-experts/navigator" },
-      { name: "Support", href: "/our-experts/support" },
-      { name: "Other", href: "/our-experts/other" },
-    ],
-  },
+  // {
+  //   name: "Our Experts",
+  //   href: "/our-experts",
+  //   children: [
+  //     { name: "Physician", href: "/our-experts/physician" },
+  //     { name: "Nurse", href: "/our-experts/nurse" },
+  //     { name: "Dentist", href: "/our-experts/dentist" },
+  //     { name: "Optometrist", href: "/our-experts/optometrist" },
+  //     { name: "Audiometrist", href: "/our-experts/audiometrist" },
+  //     { name: "Physiotherapist", href: "/our-experts/physiotherapist" },
+  //     { name: "Psychologist", href: "/our-experts/psychologist" },
+  //     { name: "Nutritionist", href: "/our-experts/nutritionist" },
+  //     { name: "Navigator", href: "/our-experts/navigator" },
+  //     { name: "Support", href: "/our-experts/support" },
+  //     { name: "Other", href: "/our-experts/other" },
+  //   ],
+  // },
   { name: "OKADOC", href: "https://www.okadoc.com/" },
   { name: "Contact", href: "/contact" },
 ];
@@ -54,6 +46,13 @@ const MenuItem = ({ item, onClick }) => {
   const [open, setOpen] = useState(false);
 
   if (item.children) {
+    // Calculate items per column for 3-column layout
+    const totalItems = item.children.length;
+    const itemsPerColumn = Math.ceil(totalItems / 3);
+    const column1 = item.children.slice(0, itemsPerColumn);
+    const column2 = item.children.slice(itemsPerColumn, itemsPerColumn * 2);
+    const column3 = item.children.slice(itemsPerColumn * 2);
+
     return (
       <li className="relative group lg:static">
         <button
@@ -62,7 +61,7 @@ const MenuItem = ({ item, onClick }) => {
         >
           {item.name}
           <svg
-            className={`w-4 h-4 mt-0.5  transition-transform ${
+            className={`w-4 h-4 mt-0.5 transition-transform ${
               open ? "transform rotate-0" : "rotate-270 lg:rotate-0"
             }`}
             fill="none"
@@ -77,10 +76,12 @@ const MenuItem = ({ item, onClick }) => {
             />
           </svg>
         </button>
+
+        {/* Mobile Menu - Single Column */}
         <ul
           className={`${
-            open ? "block" : "hidden lg:group-hover:block"
-          } lg:bg-white lg:shadow-lg lg:absolute mt-0 py-2 rounded-md w-40 z-50`}
+            open ? "block" : "hidden"
+          } lg:hidden mt-0 py-2`}
         >
           {item.children.map((child, index) => (
             <li key={index}>
@@ -94,6 +95,64 @@ const MenuItem = ({ item, onClick }) => {
             </li>
           ))}
         </ul>
+
+        {/* Desktop Mega Menu - 3 Columns */}
+        <div
+          className={`hidden lg:group-hover:block absolute left-1/2 transform -translate-x-1/2 mt-0 bg-white shadow-lg rounded-md z-50 min-w-max`}
+        >
+          <div className="grid grid-cols-3 gap-6 p-6">
+            {/* Column 1 */}
+            <div className="min-w-[200px]">
+              <ul className="space-y-2">
+                {column1.map((child, index) => (
+                  <li key={index}>
+                    <Link
+                      href={child.href}
+                      onClick={onClick}
+                      className="block px-4 py-2 text-sm text-slate-600 hover:text-red-500 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      {child.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 2 */}
+            <div className="min-w-[200px]">
+              <ul className="space-y-2">
+                {column2.map((child, index) => (
+                  <li key={index}>
+                    <Link
+                      href={child.href}
+                      onClick={onClick}
+                      className="block px-4 py-2 text-sm text-slate-600 hover:text-red-500 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      {child.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 3 */}
+            <div className="min-w-[200px]">
+              <ul className="space-y-2">
+                {column3.map((child, index) => (
+                  <li key={index}>
+                    <Link
+                      href={child.href}
+                      onClick={onClick}
+                      className="block px-4 py-2 text-sm text-slate-600 hover:text-red-500 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      {child.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </li>
     );
   }
