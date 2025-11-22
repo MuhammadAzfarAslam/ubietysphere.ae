@@ -32,7 +32,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Column A */}
           <div>
-            <Image src={"/assets/svg/logo2.svg"} width={100} height={50} alt="footer logo" />
+            <Image src={"/assets/images/logo.png"} width={100} height={50} alt="footer logo" />
             <p className="mt-4 text-sm">
               Deleniti aeue corrupti quos dolores quas tias excepturi sint
               occaecati rupiditate non similique sunt incidunt…
