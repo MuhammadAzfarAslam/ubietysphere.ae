@@ -3,17 +3,21 @@ import TeamCard from "@/components/cards/TeamCard";
 import React from "react";
 import { DOCTOR_CATEGORIES } from "@/utils/enums";
 import { SERVICE_CONTENT } from "@/utils/serviceContent";
+import getData from "@/utils/getData";
 
-const ServiceDetailPage = ({ params }) => {
+const ServiceDetailPage = async ({ params }) => {
   // Get slug from params
-  const slug = params.slug;
+  const slug = await params.slug;
+
+  const doctorList = await getData(`doctor/by-professions?slug=${slug}`);
 
   // Get service content by slug
   const serviceContent = SERVICE_CONTENT[slug] || {
     slug: slug,
-    title: DOCTOR_CATEGORIES.find(
-      (category) => category.toLowerCase().replace(/\s+/g, "-") === slug
-    ) || "Our Service",
+    title:
+      DOCTOR_CATEGORIES.find(
+        (category) => category.toLowerCase().replace(/\s+/g, "-") === slug
+      ) || "Our Service",
     bannerText: "Professional healthcare services tailored to your needs.",
   };
 
@@ -25,8 +29,7 @@ const ServiceDetailPage = ({ params }) => {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage:
-                'url("/assets/images/service.png")',
+              backgroundImage: 'url("/assets/images/service.png")',
             }}
           ></div>
           <div className="absolute inset-0 bg-black opacity-70"></div>
@@ -87,8 +90,8 @@ const ServiceDetailPage = ({ params }) => {
                     Expert Guidance
                   </h3>
                   <p className="text-gray-500 mt-2 text-sm transition-colors duration-300">
-                    Work with certified nutritionists who have years of experience
-                    in helping clients achieve sustainable results.
+                    Work with certified nutritionists who have years of
+                    experience in helping clients achieve sustainable results.
                   </p>
                 </div>
               </div>
@@ -147,8 +150,8 @@ const ServiceDetailPage = ({ params }) => {
                     Flexible Scheduling
                   </h3>
                   <p className="text-gray-500 mt-2 text-sm transition-colors duration-300">
-                    Choose appointment times that work for you with our convenient
-                    online booking and consultation options.
+                    Choose appointment times that work for you with our
+                    convenient online booking and consultation options.
                   </p>
                 </div>
               </div>
@@ -301,15 +304,38 @@ const ServiceDetailPage = ({ params }) => {
                         <span className="text-2xl">✓</span>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
+                            Expert Consultation
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Professional guidance from certified specialists
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">✓</span>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            Evidence-Based Approach
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Treatment methods backed by latest medical research
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">✓</span>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
                             Ongoing Support
                           </p>
                           <p className="text-sm text-gray-600">
-                            Regular follow-ups to track your progress
+                            Regular follow-ups to track your progress and adjust
+                            care
                           </p>
                         </div>
                       </div>
                     </div>
-                    <div className="mt-8 pt-6 border-t border-gray-200">
+                    {/* <div className="mt-8 pt-6 border-t border-gray-200">
                       <h4 className="text-sm font-semibold text-gray-900 mb-3">
                         Contact Information
                       </h4>
@@ -333,7 +359,7 @@ const ServiceDetailPage = ({ params }) => {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
@@ -350,71 +376,26 @@ const ServiceDetailPage = ({ params }) => {
               Meet Our {serviceContent.title} Experts
             </h2>
             <p className="text-base text-gray-700 mb-6 max-w-2xl mx-auto">
-              Our team of certified {serviceContent.title.toLowerCase()} professionals are
-              here to guide you on your wellness journey with personalized care
-              and expert knowledge.
+              Our team of certified {serviceContent.title.toLowerCase()}{" "}
+              professionals are here to guide you on your wellness journey with
+              personalized care and expert knowledge.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 pt-12">
-              <div className="relative flex flex-col items-center text-center">
-                <div className="relative h-60 w-full">
-                  <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
-                    alt="Dr. Sarah Johnson"
-                    className="rounded-2xl object-top mb-4 shadow w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 pt-6">
-                  Dr. Sarah Johnson
-                </h3>
-                <p className="text-sm text-gray-500 capitalize">
-                  Senior Nutrition Specialist
-                </p>
-              </div>
-              <div className="relative flex flex-col items-center text-center">
-                <div className="relative h-60 w-full">
-                  <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Michael"
-                    alt="Dr. Michael Chen"
-                    className="rounded-2xl object-top mb-4 shadow w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 pt-6">
-                  Dr. Michael Chen
-                </h3>
-                <p className="text-sm text-gray-500 capitalize">
-                  Senior Dietetic Counselor
-                </p>
-              </div>
-              <div className="relative flex flex-col items-center text-center">
-                <div className="relative h-60 w-full">
-                  <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Emily"
-                    alt="Dr. Emily Rodriguez"
-                    className="rounded-2xl object-top mb-4 shadow w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 pt-6">
-                  Dr. Emily Rodriguez
-                </h3>
-                <p className="text-sm text-gray-500 capitalize">
-                  Senior Wellness Coach
-                </p>
-              </div>
-              <div className="relative flex flex-col items-center text-center">
-                <div className="relative h-60 w-full">
-                  <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=David"
-                    alt="Dr. David Park"
-                    className="rounded-2xl object-top mb-4 shadow w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 pt-6">
-                  Dr. David Park
-                </h3>
-                <p className="text-sm text-gray-500 capitalize">
-                  Senior Clinical Nutritionist
-                </p>
-              </div>
+              {doctorList?.data?.content?.map((doctor) => (
+                <TeamCard
+                  key={doctor.id}
+                  imageURL={
+                    doctor?.imageName !== null
+                      ? `https://cms.ubietysphere.ae/img/user-images/${doctor?.imageName}`
+                      : `${process.env.NEXT_PUBLIC_URL}assets/images/placeholder-user.png`
+                  }
+                  title={`${doctor.firstName} ${doctor.lastName}`}
+                  designation={serviceContent.title}
+                  service={slug}
+                  slug={doctor.slug}
+                  totalExperience={doctor.totalExperience}
+                />
+              ))}
             </div>
           </div>
         </section>
