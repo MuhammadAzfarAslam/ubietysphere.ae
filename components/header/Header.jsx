@@ -46,15 +46,14 @@ const MenuItem = ({ item, onClick }) => {
   const [open, setOpen] = useState(false);
 
   if (item.children) {
-    // Calculate items per column for 3-column layout
+    // Calculate items per column for 2-column layout
     const totalItems = item.children.length;
-    const itemsPerColumn = Math.ceil(totalItems / 3);
+    const itemsPerColumn = Math.ceil(totalItems / 2);
     const column1 = item.children.slice(0, itemsPerColumn);
-    const column2 = item.children.slice(itemsPerColumn, itemsPerColumn * 2);
-    const column3 = item.children.slice(itemsPerColumn * 2);
+    const column2 = item.children.slice(itemsPerColumn);
 
     return (
-      <li className="relative group lg:static">
+      <li className="relative group">
         <button
           onClick={() => setOpen(!open)}
           className="flex items-center p-1 text-base gap-x-2 text-slate-600 hover:text-red-500"
@@ -96,11 +95,11 @@ const MenuItem = ({ item, onClick }) => {
           ))}
         </ul>
 
-        {/* Desktop Mega Menu - 3 Columns */}
+        {/* Desktop Mega Menu - 2 Columns */}
         <div
-          className={`hidden lg:group-hover:block absolute left-1/2 transform -translate-x-1/2 mt-0 bg-white shadow-lg rounded-md z-50 min-w-max`}
+          className={`hidden lg:group-hover:block absolute right-0 top-full mt-0 bg-white shadow-lg rounded-md z-50 min-w-max`}
         >
-          <div className="grid grid-cols-3 gap-6 p-6">
+          <div className="grid grid-cols-2 gap-6 p-6">
             {/* Column 1 */}
             <div className="min-w-[200px]">
               <ul className="space-y-2">
@@ -122,23 +121,6 @@ const MenuItem = ({ item, onClick }) => {
             <div className="min-w-[200px]">
               <ul className="space-y-2">
                 {column2.map((child, index) => (
-                  <li key={index}>
-                    <Link
-                      href={child.href}
-                      onClick={onClick}
-                      className="block px-4 py-2 text-sm text-slate-600 hover:text-red-500 hover:bg-gray-50 rounded-md transition-colors"
-                    >
-                      {child.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Column 3 */}
-            <div className="min-w-[200px]">
-              <ul className="space-y-2">
-                {column3.map((child, index) => (
                   <li key={index}>
                     <Link
                       href={child.href}
