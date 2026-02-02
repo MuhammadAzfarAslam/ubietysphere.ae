@@ -24,6 +24,7 @@ const Contact = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
@@ -86,7 +87,7 @@ const Contact = () => {
         >
           Subject*
         </label>
-        <CategorySelect register={register} name="subject" />
+        <CategorySelect setValue={setValue} name="subject" />
         <p className="text-red-500 text-sm">{errors.subject?.message}</p>
       </div>
 

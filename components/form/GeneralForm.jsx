@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -10,8 +11,10 @@ import CategorySelect from "./CategorySelect";
 import { useToast } from "../toaster/ToastContext";
 import PhoneInput from "./PhoneInput";
 import DatePicker from "./DatePicker";
+import { DISCIPLINE_CATEGORIES } from "@/utils/enums";
 
 const GeneralForm = ({ data, accessToken }) => {
+  const { update: updateSession } = useSession();
   // Define validation schema dynamically based on user role
   const schema = yup.object({
     firstName: yup.string().required("First name is required"),
@@ -25,9 +28,10 @@ const GeneralForm = ({ data, accessToken }) => {
       .required("Mobile number is required"),
     address: yup.string(),
     nationality: yup.string().required("Nationality is required"),
-    // Category is only required for Doctors
+    // Doctor-specific fields
     ...(data?.role === "Doctor" && {
-      category: yup.string().required("Category is required"),
+      disciplines: yup.array().of(yup.string()).min(1, "At least one discipline is required"),
+      services: yup.array().of(yup.string()).min(1, "At least one service is required"),
       totalExperience: yup.string(),
       workDays: yup.array().of(yup.string()),
     }),
@@ -62,7 +66,8 @@ const GeneralForm = ({ data, accessToken }) => {
       facebook: data?.details?.socialMediaUrls?.facebook || "",
       // Only include doctor-specific fields for Doctors
       ...(data?.role === "Doctor" && {
-        category: data?.details?.category || "",
+        disciplines: data?.details?.disciplines || [],
+        services: data?.details?.services || [],
         totalExperience: data?.details?.totalExperience || "",
         workDays: data?.details?.workDays || [],
       }),
@@ -94,7 +99,8 @@ const GeneralForm = ({ data, accessToken }) => {
 
     // Only include doctor-specific fields for Doctors
     if (data?.role === "Doctor") {
-      details.category = formData.category;
+      details.disciplines = formData.disciplines || [];
+      details.services = formData.services || [];
       details.totalExperience = Number(formData.totalExperience);
       details.workDays = formData.workDays || [];
     }
@@ -119,6 +125,15 @@ const GeneralForm = ({ data, accessToken }) => {
         Authorization: `Bearer ${accessToken}`,
       });
       console.log("Update response:", response);
+
+      // Update session with new disciplines/services
+      if (data?.role === "Doctor") {
+        await updateSession({
+          disciplines: formData.disciplines || [],
+          services: formData.services || [],
+        });
+      }
+
       addToast("Your info has been updated!", "success");
     } catch (error) {
       console.error("Update failed:", error);
@@ -346,17 +361,30 @@ const GeneralForm = ({ data, accessToken }) => {
         {data?.role === "Doctor" && (
           <>
             <div>
-              <label
-                htmlFor="category"
-                className="block text-sm font-medium text-light"
-              >
-                Category
+              <label className="block text-sm font-medium text-light">
+                Disciplines
               </label>
               <CategorySelect
-                register={register}
-                defaultValue={data?.details?.category || ""}
+                setValue={setValue}
+                defaultValue={data?.details?.disciplines || []}
+                name="disciplines"
+                multiple
+                options={DISCIPLINE_CATEGORIES}
               />
-              <p className="text-red-500 text-sm">{errors.category?.message}</p>
+              <p className="text-red-500 text-sm">{errors.disciplines?.message}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-light">
+                Services
+              </label>
+              <CategorySelect
+                setValue={setValue}
+                defaultValue={data?.details?.services || []}
+                name="services"
+                multiple
+              />
+              <p className="text-red-500 text-sm">{errors.services?.message}</p>
             </div>
 
             <div>

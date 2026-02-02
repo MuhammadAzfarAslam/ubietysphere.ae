@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { SERVICE_CONTENT } from "@/utils/serviceContent";
 import { useToast } from "@/components/toaster/ToastContext";
+import { postData } from "@/utils/getData";
+import getData from "@/utils/getData";
 
-// Mock doctor's services - in real app, this would come from API
-const DOCTOR_SERVICES = ["second-opinion", "women's-health"];
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", fullLabel: "Monday" },
@@ -67,8 +67,9 @@ const formatDateKey = (date) => {
   return date.toISOString().split("T")[0];
 };
 
-const Slots = () => {
+const Slots = ({ accessToken, services = [] }) => {
   const { addToast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("week"); // "week" or "month"
   const [currentDate, setCurrentDate] = useState(new Date());
   const [slots, setSlots] = useState({});
@@ -92,13 +93,86 @@ const Slots = () => {
     targetDate: "",
   });
 
-  // Get doctor's available services with details
+  // Compute date range based on current view
+  const getDateRange = useCallback(() => {
+    if (viewMode === "week") {
+      const weekDates = getWeekDates(currentDate);
+      return {
+        startDate: formatDateKey(weekDates[0]),
+        endDate: formatDateKey(weekDates[6]),
+      };
+    } else {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      // Include padding days
+      const startPadding = (firstDay.getDay() + 6) % 7;
+      const start = new Date(firstDay);
+      start.setDate(start.getDate() - startPadding);
+      const remaining = 7 - ((lastDay.getDate() + startPadding) % 7);
+      const end = new Date(lastDay);
+      if (remaining < 7) end.setDate(end.getDate() + remaining);
+      return {
+        startDate: formatDateKey(start),
+        endDate: formatDateKey(end),
+      };
+    }
+  }, [viewMode, currentDate]);
+
+  // Fetch slots from API
+  const fetchSlots = useCallback(async () => {
+    if (!accessToken) return;
+    const { startDate, endDate } = getDateRange();
+    try {
+      setLoading(true);
+      const response = await getData(
+        `doctor/slots?startDate=${startDate}&endDate=${endDate}&size=100`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      const apiSlots = response?.data?.slots || {};
+      // Map API response to local format
+      const mapped = {};
+      Object.entries(apiSlots).forEach(([dateKey, daySlots]) => {
+        mapped[dateKey] = daySlots.map((slot) => ({
+          id: slot.id,
+          startTime: slot.startTime.substring(0, 5), // "HH:mm:ss" -> "HH:mm"
+          endTime: slot.endTime.substring(0, 5),
+          duration: slot.duration,
+          service: slot.serviceSlug,
+          serviceTitle: slot.serviceTitle,
+          status: slot.status,
+        }));
+      });
+      setSlots(mapped);
+    } catch (error) {
+      console.error("Failed to fetch slots:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken, getDateRange]);
+
+  useEffect(() => {
+    fetchSlots();
+  }, [fetchSlots]);
+
+  // Get doctor's available services with details from session
   const doctorServices = useMemo(() => {
-    return DOCTOR_SERVICES.map((slug) => ({
-      ...SERVICE_CONTENT[slug],
-      slug,
-    })).filter(Boolean);
-  }, []);
+    return services.map((s) => {
+      // Handle both formats: plain string "Children's Health" or object {name, slug}
+      const name = typeof s === "string" ? s : s.name;
+      const slug = typeof s === "string" ? null : s.slug;
+      // Try to find in SERVICE_CONTENT by slug, or by matching title
+      const content = slug
+        ? SERVICE_CONTENT[slug]
+        : Object.values(SERVICE_CONTENT).find((c) => c.title === name);
+      return {
+        title: content?.title || name,
+        slug: content?.slug || slug || name,
+        durations: content?.durations || [30],
+      };
+    }).filter((s) => s.title);
+  }, [services]);
 
   // Get available durations for selected service
   const availableDurations = useMemo(() => {
@@ -139,21 +213,8 @@ const Slots = () => {
     return generatedSlots;
   };
 
-  // Check for slot conflicts
-  const hasConflict = (dateKey, newSlot) => {
-    const daySlots = slots[dateKey] || [];
-    const newStart = parseInt(newSlot.startTime.replace(":", ""));
-    const newEnd = parseInt(newSlot.endTime.replace(":", ""));
-
-    return daySlots.some((existingSlot) => {
-      const existStart = parseInt(existingSlot.startTime.replace(":", ""));
-      const existEnd = parseInt(existingSlot.endTime.replace(":", ""));
-      return newStart < existEnd && newEnd > existStart;
-    });
-  };
-
   // Handle adding slots
-  const handleAddSlots = () => {
+  const handleAddSlots = async () => {
     if (!formData.service || !formData.duration) {
       addToast("Please select a service and duration", "error");
       return;
@@ -176,124 +237,111 @@ const Slots = () => {
     }
 
     const weekDates = getWeekDates(currentDate);
-    const daysToAdd = selectedDate
+    const dates = selectedDate
       ? [selectedDate]
       : formData.selectedDays.map((dayIndex) => formatDateKey(weekDates[dayIndex]));
 
-    let conflictFound = false;
-    const updatedSlots = { ...slots };
+    setLoading(true);
+    try {
+      await postData(
+        "doctor/slots",
+        {
+          serviceSlug: formData.service,
+          startTime: formData.startTime,
+          endTime: formData.endTime,
+          duration: parseInt(formData.duration),
+          dates,
+        },
+        { Authorization: `Bearer ${accessToken}` }
+      );
 
-    daysToAdd.forEach((dateKey) => {
-      newSlots.forEach((slot) => {
-        const slotWithService = {
-          ...slot,
-          id: `${dateKey}-${slot.startTime}-${formData.service}`,
-          service: formData.service,
-          serviceTitle: SERVICE_CONTENT[formData.service]?.title,
-        };
-
-        if (hasConflict(dateKey, slotWithService)) {
-          conflictFound = true;
-        } else {
-          if (!updatedSlots[dateKey]) {
-            updatedSlots[dateKey] = [];
-          }
-          updatedSlots[dateKey].push(slotWithService);
-        }
+      await fetchSlots();
+      setShowAddModal(false);
+      setSelectedDate(null);
+      setFormData({
+        service: "",
+        duration: "",
+        startTime: "09:00",
+        endTime: "17:00",
+        selectedDays: [],
       });
-    });
-
-    if (conflictFound) {
-      addToast("Some slots were skipped due to conflicts", "warning");
+      addToast("Slots added successfully!", "success");
+    } catch (error) {
+      addToast("Failed to add slots. Please try again.", "error");
+    } finally {
+      setLoading(false);
     }
-
-    // Sort slots by time
-    Object.keys(updatedSlots).forEach((key) => {
-      updatedSlots[key].sort((a, b) => a.startTime.localeCompare(b.startTime));
-    });
-
-    setSlots(updatedSlots);
-    setShowAddModal(false);
-    setSelectedDate(null);
-    setFormData({
-      service: "",
-      duration: "",
-      startTime: "09:00",
-      endTime: "17:00",
-      selectedDays: [],
-    });
-    addToast("Slots added successfully!", "success");
   };
 
-  // Handle deleting a slot
-  const handleDeleteSlot = (dateKey, slotId) => {
-    const updatedSlots = { ...slots };
-    updatedSlots[dateKey] = updatedSlots[dateKey].filter((s) => s.id !== slotId);
-    if (updatedSlots[dateKey].length === 0) {
-      delete updatedSlots[dateKey];
+  // Handle deleting a single slot
+  const handleDeleteSlot = async (dateKey, slotId) => {
+    try {
+      await postData(`doctor/slots/${slotId}`, {}, { Authorization: `Bearer ${accessToken}` }, "DELETE");
+      await fetchSlots();
+      addToast("Slot deleted", "success");
+    } catch (error) {
+      addToast("Failed to delete slot", "error");
     }
-    setSlots(updatedSlots);
-    addToast("Slot deleted", "success");
+  };
+
+  // Handle deleting all slots for a date
+  const handleDeleteDaySlots = async (dateKey) => {
+    try {
+      await postData(`doctor/slots/by-date/${dateKey}`, {}, { Authorization: `Bearer ${accessToken}` }, "DELETE");
+      await fetchSlots();
+      addToast("All slots for the day cleared", "success");
+    } catch (error) {
+      addToast("Failed to clear day slots", "error");
+    }
+  };
+
+  // Get Monday of a given date's week
+  const getMonday = (dateStr) => {
+    const date = new Date(dateStr);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    date.setDate(diff);
+    return formatDateKey(date);
   };
 
   // Handle duplicate
-  const handleDuplicate = () => {
+  const handleDuplicate = async () => {
     if (!duplicateData.sourceDate || !duplicateData.targetDate) {
       addToast("Please select source and target dates", "error");
       return;
     }
 
-    const updatedSlots = { ...slots };
-
-    if (duplicateData.type === "day") {
-      const sourceSlots = slots[duplicateData.sourceDate] || [];
-      if (sourceSlots.length === 0) {
-        addToast("No slots found on source date", "error");
-        return;
+    setLoading(true);
+    try {
+      if (duplicateData.type === "day") {
+        await postData(
+          "doctor/slots/duplicate-day",
+          {
+            sourceDate: duplicateData.sourceDate,
+            targetDate: duplicateData.targetDate,
+          },
+          { Authorization: `Bearer ${accessToken}` }
+        );
+      } else {
+        await postData(
+          "doctor/slots/duplicate-week",
+          {
+            sourceWeekStart: getMonday(duplicateData.sourceDate),
+            targetWeekStart: getMonday(duplicateData.targetDate),
+          },
+          { Authorization: `Bearer ${accessToken}` }
+        );
       }
 
-      const newSlots = sourceSlots.map((slot) => ({
-        ...slot,
-        id: `${duplicateData.targetDate}-${slot.startTime}-${slot.service}`,
-      }));
-
-      updatedSlots[duplicateData.targetDate] = [
-        ...(updatedSlots[duplicateData.targetDate] || []),
-        ...newSlots,
-      ];
-    } else {
-      // Duplicate week
-      const sourceWeekDates = getWeekDates(new Date(duplicateData.sourceDate));
-      const targetWeekDates = getWeekDates(new Date(duplicateData.targetDate));
-
-      sourceWeekDates.forEach((sourceDate, index) => {
-        const sourceDateKey = formatDateKey(sourceDate);
-        const targetDateKey = formatDateKey(targetWeekDates[index]);
-        const sourceSlots = slots[sourceDateKey] || [];
-
-        if (sourceSlots.length > 0) {
-          const newSlots = sourceSlots.map((slot) => ({
-            ...slot,
-            id: `${targetDateKey}-${slot.startTime}-${slot.service}`,
-          }));
-
-          updatedSlots[targetDateKey] = [
-            ...(updatedSlots[targetDateKey] || []),
-            ...newSlots,
-          ];
-        }
-      });
+      await fetchSlots();
+      setShowDuplicateModal(false);
+      setDuplicateData({ type: "day", sourceDate: "", targetDate: "" });
+      addToast("Slots duplicated successfully!", "success");
+    } catch (error) {
+      addToast("Failed to duplicate slots. Please try again.", "error");
+    } finally {
+      setLoading(false);
     }
-
-    // Sort slots
-    Object.keys(updatedSlots).forEach((key) => {
-      updatedSlots[key].sort((a, b) => a.startTime.localeCompare(b.startTime));
-    });
-
-    setSlots(updatedSlots);
-    setShowDuplicateModal(false);
-    setDuplicateData({ type: "day", sourceDate: "", targetDate: "" });
-    addToast("Slots duplicated successfully!", "success");
   };
 
   // Navigate weeks/months
@@ -363,13 +411,13 @@ const Slots = () => {
   const getServiceColor = (serviceSlug) => {
     const colors = {
       "second-opinion": "bg-blue-100 text-blue-800 border-blue-200",
-      "women's-health": "bg-pink-100 text-pink-800 border-pink-200",
+      "women-s-health": "bg-pink-100 text-pink-800 border-pink-200",
       "expert-medical-consultation": "bg-green-100 text-green-800 border-green-200",
       "mental-health-counseling": "bg-purple-100 text-purple-800 border-purple-200",
       "holistic-health-counseling": "bg-teal-100 text-teal-800 border-teal-200",
       "lifestyle-management-and-coaching": "bg-orange-100 text-orange-800 border-orange-200",
       "nutrition-and-dietetics-counseling": "bg-yellow-100 text-yellow-800 border-yellow-200",
-      "children's-health": "bg-cyan-100 text-cyan-800 border-cyan-200",
+      "children-s-health": "bg-cyan-100 text-cyan-800 border-cyan-200",
       "genetic-counselor": "bg-indigo-100 text-indigo-800 border-indigo-200",
     };
     return colors[serviceSlug] || "bg-gray-100 text-gray-800 border-gray-200";
@@ -492,15 +540,28 @@ const Slots = () => {
                     key={dayIndex}
                     className="min-h-[300px] bg-gray-50 rounded-b-lg p-2 border border-gray-200"
                   >
-                    <button
-                      onClick={() => {
-                        setSelectedDate(dateKey);
-                        setShowAddModal(true);
-                      }}
-                      className="w-full mb-2 py-1 text-xs text-gray-500 hover:text-primary hover:bg-gray-100 rounded transition"
-                    >
-                      + Add
-                    </button>
+                    <div className="flex gap-1 mb-2">
+                      <button
+                        onClick={() => {
+                          setSelectedDate(dateKey);
+                          setShowAddModal(true);
+                        }}
+                        className="flex-1 py-1 text-xs text-gray-500 hover:text-primary hover:bg-gray-100 rounded transition"
+                      >
+                        + Add
+                      </button>
+                      {daySlots.length > 0 && (
+                        <button
+                          onClick={() => handleDeleteDaySlots(dateKey)}
+                          className="py-1 px-1.5 text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                          title="Clear all slots for this day"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
 
                     <div className="space-y-1">
                       {daySlots.map((slot) => (
@@ -770,9 +831,10 @@ const Slots = () => {
                   </button>
                   <button
                     onClick={handleAddSlots}
-                    className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-light transition"
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-light transition disabled:opacity-50"
                   >
-                    Add Slots
+                    {loading ? "Adding..." : "Add Slots"}
                   </button>
                 </div>
               </div>
@@ -833,31 +895,95 @@ const Slots = () => {
                 {/* Source Date */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {duplicateData.type === "day" ? "Source Date" : "Source Week (any day in week)"}
+                    {duplicateData.type === "day" ? "Source Date" : "Source Week"}
                   </label>
-                  <input
-                    type="date"
-                    value={duplicateData.sourceDate}
-                    onChange={(e) =>
-                      setDuplicateData({ ...duplicateData, sourceDate: e.target.value })
-                    }
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                  />
+                  {duplicateData.type === "day" ? (
+                    <input
+                      type="date"
+                      value={duplicateData.sourceDate}
+                      onChange={(e) =>
+                        setDuplicateData({ ...duplicateData, sourceDate: e.target.value })
+                      }
+                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  ) : (
+                    <select
+                      value={duplicateData.sourceDate}
+                      onChange={(e) =>
+                        setDuplicateData({ ...duplicateData, sourceDate: e.target.value })
+                      }
+                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+                    >
+                      <option value="">Select a week</option>
+                      {(() => {
+                        const weeks = [];
+                        const today = new Date();
+                        const startMonday = new Date(getMonday(formatDateKey(today)));
+                        for (let i = -8; i <= 8; i++) {
+                          const mon = new Date(startMonday);
+                          mon.setDate(mon.getDate() + i * 7);
+                          const sun = new Date(mon);
+                          sun.setDate(sun.getDate() + 6);
+                          weeks.push({
+                            value: formatDateKey(mon),
+                            label: `${formatDate(mon)} – ${formatDate(sun)}, ${mon.getFullYear()}`,
+                          });
+                        }
+                        return weeks.map((w) => (
+                          <option key={w.value} value={w.value}>
+                            {w.label}
+                          </option>
+                        ));
+                      })()}
+                    </select>
+                  )}
                 </div>
 
                 {/* Target Date */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {duplicateData.type === "day" ? "Target Date" : "Target Week (any day in week)"}
+                    {duplicateData.type === "day" ? "Target Date" : "Target Week"}
                   </label>
-                  <input
-                    type="date"
-                    value={duplicateData.targetDate}
-                    onChange={(e) =>
-                      setDuplicateData({ ...duplicateData, targetDate: e.target.value })
-                    }
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                  />
+                  {duplicateData.type === "day" ? (
+                    <input
+                      type="date"
+                      value={duplicateData.targetDate}
+                      onChange={(e) =>
+                        setDuplicateData({ ...duplicateData, targetDate: e.target.value })
+                      }
+                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  ) : (
+                    <select
+                      value={duplicateData.targetDate}
+                      onChange={(e) =>
+                        setDuplicateData({ ...duplicateData, targetDate: e.target.value })
+                      }
+                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+                    >
+                      <option value="">Select a week</option>
+                      {(() => {
+                        const weeks = [];
+                        const today = new Date();
+                        const startMonday = new Date(getMonday(formatDateKey(today)));
+                        for (let i = -8; i <= 8; i++) {
+                          const mon = new Date(startMonday);
+                          mon.setDate(mon.getDate() + i * 7);
+                          const sun = new Date(mon);
+                          sun.setDate(sun.getDate() + 6);
+                          weeks.push({
+                            value: formatDateKey(mon),
+                            label: `${formatDate(mon)} – ${formatDate(sun)}, ${mon.getFullYear()}`,
+                          });
+                        }
+                        return weeks.map((w) => (
+                          <option key={w.value} value={w.value}>
+                            {w.label}
+                          </option>
+                        ));
+                      })()}
+                    </select>
+                  )}
                 </div>
 
                 {/* Actions */}
@@ -870,9 +996,10 @@ const Slots = () => {
                   </button>
                   <button
                     onClick={handleDuplicate}
-                    className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-light transition"
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-light transition disabled:opacity-50"
                   >
-                    Duplicate
+                    {loading ? "Duplicating..." : "Duplicate"}
                   </button>
                 </div>
               </div>

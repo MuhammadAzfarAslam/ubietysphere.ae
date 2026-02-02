@@ -36,6 +36,8 @@ export const authOptions = {
             email: user.email,
             role: user.role, // "Doctor", "Patient", etc.
             accessToken: user.accessToken, // your backend JWT
+            disciplines: user.disciplines || [],
+            services: user.services || [],
           };
         } else {
           console.log("❌ Login failed or missing accessToken");
@@ -47,7 +49,7 @@ export const authOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session: updateData }) {
       console.log("🔑 JWT callback - user:", user);
       
       // Initialize token if it doesn't exist
@@ -61,9 +63,17 @@ export const authOptions = {
         };
       }
       
+      // Handle session update from client (e.g. after profile save)
+      if (trigger === "update" && updateData) {
+        if (updateData.disciplines) token.disciplines = updateData.disciplines;
+        if (updateData.services) token.services = updateData.services;
+      }
+
       if (user) {
         token.accessToken = user.accessToken; // copy to token
         token.role = user.role;
+        token.disciplines = user.disciplines;
+        token.services = user.services;
 
         // Extract 'exp' from the token (JWT token will have the 'exp' claim)
         try {
@@ -118,6 +128,8 @@ export const authOptions = {
       session.accessToken = token.accessToken; // expose in session
       session.user.role = token.role; // add role to user object
       session.user.id = token.sub;
+      session.user.disciplines = token.disciplines || [];
+      session.user.services = token.services || [];
       return session;
     },
   },

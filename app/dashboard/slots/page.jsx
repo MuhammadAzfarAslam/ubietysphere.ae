@@ -12,7 +12,7 @@ const SlotsPage = async () => {
     redirect("/dashboard");
   }
 
-  return <Slots accessToken={session?.accessToken} />;
+  return <Slots accessToken={session?.accessToken} services={session?.user?.services || []} />;
 };
 
 export default SlotsPage;

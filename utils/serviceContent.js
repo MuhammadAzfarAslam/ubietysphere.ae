@@ -41,15 +41,15 @@ export const SERVICE_CONTENT = {
     bannerText:
       "Personalized nutrition guidance for optimal health. Our registered dietitians and nutritionists create customized meal plans and dietary strategies tailored to your unique needs, health conditions, and lifestyle goals.",
   },
-  "children's-health": {
-    slug: "children's-health",
+  "children-s-health": {
+    slug: "children-s-health",
     title: "Children's Health",
     durations: [20, 30],
     bannerText:
       "Comprehensive healthcare for infants, children, and adolescents. Our pediatric specialists provide preventive care, developmental monitoring, and compassionate treatment to ensure your child's optimal health and growth.",
   },
-  "women's-health": {
-    slug: "women's-health",
+  "women-s-health": {
+    slug: "women-s-health",
     title: "Women's Health",
     durations: [30],
     bannerText:

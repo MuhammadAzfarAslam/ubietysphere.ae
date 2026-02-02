@@ -230,7 +230,7 @@ const JoinOurTeam = () => {
             Which discipline are you applying for*
           </label>
           <CategorySelect
-            register={register}
+            setValue={setValue}
             defaultValue=""
             name="discipline"
           />

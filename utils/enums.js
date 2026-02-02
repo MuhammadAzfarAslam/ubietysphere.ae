@@ -7,7 +7,7 @@ export const DOCTOR_CATEGORIES = [
   "Nutrition and Dietetics Counseling",
   "Children's Health",
   "Women's Health",
-  "Genetic Counseling"
+  "Genetic Counselor"
 ];
 
 
