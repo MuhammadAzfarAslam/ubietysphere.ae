@@ -1,14 +1,6 @@
-export const DOCTOR_CATEGORIES = [
-  "Expert Medical Consultation",
-  "Second Opinion",
-  "Mental Health Counseling",
-  "Holistic Health Counseling",
-  "Lifestyle Management and Coaching",
-  "Nutrition and Dietetics Counseling",
-  "Children's Health",
-  "Women's Health",
-  "Genetic Counselor"
-];
+import { SERVICE_CONTENT } from "./serviceContent";
+
+export const DOCTOR_CATEGORIES = Object.values(SERVICE_CONTENT).map((s) => s.title);
 
 
 export const DISCIPLINE_CATEGORIES = [
