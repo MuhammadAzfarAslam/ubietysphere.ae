@@ -37,6 +37,11 @@ const DashboardLayout = async ({ params, children }) => {
     { name: "License", href: "/dashboard/license", role: ["Doctor"] },
     { name: "My Slots", href: "/dashboard/slots", role: ["Doctor"] },
     {
+      name: "Appointment Room",
+      href: "/dashboard/appointment-room",
+      role: ["Doctor", "Patient", "Parent"],
+    },
+    {
       name: "My Documents",
       href: "/dashboard/my-documents",
       role: ["Patient", "Parent"],
@@ -63,7 +68,7 @@ const DashboardLayout = async ({ params, children }) => {
                   <ul className="lg:space-y-4 space-y-0.5 flex-1">
                     {sideMenu.map(
                       (item) =>
-                        item.role.includes(session.user.role) && (
+                        item.role.map(r => r.toLowerCase()).includes(session.user.role?.toLowerCase()) && (
                           <li key={item.name}>
                             <Link
                               href={item.href}
