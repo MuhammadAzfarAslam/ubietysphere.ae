@@ -335,7 +335,12 @@ const ExpertDetailPage = async ({ params }) => {
             <h3 className="text-center text-3xl capitalize font-medium">
               Book a consultation
             </h3>
-            <BookingFormWrapper doctorName={expertSlug} />
+            <BookingFormWrapper
+              doctorId={content?.id}
+              doctorName={`${content?.firstName} ${content?.lastName}`}
+              serviceSlug={slug?.replaceAll("'","-")}
+              serviceTitle={slugToTitle(slug)}
+            />
           </div>
         </div>
       </div>

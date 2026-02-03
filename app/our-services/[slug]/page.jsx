@@ -4,12 +4,13 @@ import React from "react";
 import { DOCTOR_CATEGORIES } from "@/utils/enums";
 import { SERVICE_CONTENT } from "@/utils/serviceContent";
 import getData from "@/utils/getData";
+import BookingFormWrapper from "@/components/form/BookingFormWrapper";
 
 const ServiceDetailPage = async ({ params }) => {
   // Get slug from params
   const slug = await params.slug;
 
-  const doctorList = await getData(`doctor/by-professions?slug=${slug}`);
+  const doctorList = await getData(`doctor/by-professions?slug=${slug?.replaceAll("'","-")}`);
 
   // Get service content by slug
   const serviceContent = SERVICE_CONTENT[slug] || {
@@ -177,99 +178,11 @@ const ServiceDetailPage = async ({ params }) => {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <div className="lg:col-span-2">
-                  <form className="mt-4 space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Name*
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Enter your Name"
-                          className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
-                          name="name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Email*
-                        </label>
-                        <input
-                          type="email"
-                          placeholder="Enter your Email"
-                          className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
-                          name="email"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Phone Number*
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Enter your Phone Number"
-                          className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
-                          name="phone"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Choose Doctor*
-                        </label>
-                        <select
-                          className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
-                          name="doctor"
-                        >
-                          <option value="">Select a doctor</option>
-                          <option value="Dr. Ali">Dr. Ali</option>
-                          <option value="Dr. Sara">Dr. Sara</option>
-                          <option value="Dr. John">Dr. John</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Date*
-                        </label>
-                        <input
-                          type="date"
-                          className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
-                          name="date"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Time*
-                        </label>
-                        <input
-                          type="time"
-                          className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary"
-                          name="time"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Your health complaint (150)*
-                      </label>
-                      <textarea
-                        rows="4"
-                        placeholder="Enter your Message"
-                        className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:ring-primary resize-none"
-                        name="message"
-                      ></textarea>
-                    </div>
-                    <div className="flex items-center gap-5">
-                      <button
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 min-h-9 w-full px-6 py-3 bg-primary text-white font-medium rounded-sm shadow relative overflow-hidden group border-2 border-transparent hover:border-primary transition"
-                        type="submit"
-                      >
-                        <span className="relative z-10 group-hover:text-primary">
-                          Book An Appointment
-                        </span>
-                        <span className="absolute left-0 top-0 w-full h-full bg-secondary transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-in-out"></span>
-                      </button>
-                    </div>
-                  </form>
+                  <BookingFormWrapper
+                    doctors={doctorList?.data?.content || []}
+                    serviceSlug={slug?.replaceAll("'","-")}
+                    serviceTitle={serviceContent.title}
+                  />
                 </div>
                 <div className="lg:col-span-1">
                   <div className="bg-gray-50 p-6 rounded-sm shadow-sm border border-gray-200">
