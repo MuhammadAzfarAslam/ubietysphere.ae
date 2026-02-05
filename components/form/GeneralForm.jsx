@@ -126,13 +126,15 @@ const GeneralForm = ({ data, accessToken }) => {
       });
       console.log("Update response:", response);
 
-      // Update session with new disciplines/services
-      if (data?.role === "Doctor") {
-        await updateSession({
+      // Update session with new values
+      await updateSession({
+        lastName: formData.lastName,
+        mobileNumber: formData.mobileNumber,
+        ...(data?.role === "Doctor" && {
           disciplines: formData.disciplines || [],
           services: formData.services || [],
-        });
-      }
+        }),
+      });
 
       addToast("Your info has been updated!", "success");
     } catch (error) {

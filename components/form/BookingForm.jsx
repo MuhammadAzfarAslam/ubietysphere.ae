@@ -16,7 +16,8 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 // Validation Schema
 const createSchema = (isLoggedIn) =>
   yup.object({
-    name: yup.string().required("Name is required"),
+    name: yup.string().required("First name is required"),
+    lastName: yup.string().required("Last name is required"),
     email: isLoggedIn
       ? yup.string().email("Please enter a valid email address")
       : yup.string().email("Please enter a valid email address").required("Email is required"),
@@ -95,11 +96,14 @@ const BookingForm = ({
     setValue,
   } = useForm({ resolver: yupResolver(createSchema(isLoggedIn)) });
 
-  // Auto-fill name and phone from session when logged in
+  // Auto-fill name, lastName and phone from session when logged in
   useEffect(() => {
     if (session?.user) {
       if (session.user.name) {
         setValue("name", session.user.name);
+      }
+      if (session.user.lastName) {
+        setValue("lastName", session.user.lastName);
       }
       if (session.user.phone || session.user.mobileNumber) {
         setValue("phone", session.user.phone || session.user.mobileNumber);
@@ -117,10 +121,16 @@ const BookingForm = ({
   const [selectedSlot, setSelectedSlot] = useState(null);
 
   // Booking flow state
-  const [step, setStep] = useState("select"); // "select" | "payment" | "success"
+  const [step, setStep] = useState("select"); // "select" | "otp" | "payment" | "success"
   const [appointment, setAppointment] = useState(null);
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState({ amount: null, currency: "AED" });
+
+  // OTP flow state for guest users
+  const [otp, setOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [guestFormData, setGuestFormData] = useState(null);
+  const [guestToken, setGuestToken] = useState(null);
 
   // Format date for display
   const formatDisplayDate = (dateStr) => {
@@ -205,11 +215,47 @@ const BookingForm = ({
   };
 
   const onSubmit = async (formData) => {
-    if (!selectedSlot || !accessToken) {
+    if (!selectedSlot) {
       addToast("Please select a date and time slot", "error");
       return;
     }
 
+    // If user is not logged in, start OTP flow
+    if (!isLoggedIn) {
+      setLoading(true);
+      try {
+        // Call signup-with-otp API
+        const otpRes = await postData("user/signup-with-otp", {
+          firstName: formData.name,
+          lastName: formData.lastName,
+          email: formData.email,
+          mobileNumber: formData.phone,
+          role: "Patient",
+        });
+
+        if (otpRes?.status === "error") {
+          throw new Error(otpRes?.message || "Failed to send OTP");
+        }
+
+        // Save form data for after OTP verification
+        setGuestFormData(formData);
+        setStep("otp");
+        addToast("OTP sent to your email. Please verify to continue.", "success");
+      } catch (error) {
+        console.error("OTP request failed:", error);
+        addToast(error.message || "Failed to send OTP. Please try again.", "error");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Logged-in user flow
+    await createAppointment(formData, accessToken);
+  };
+
+  // Create appointment with token
+  const createAppointment = async (formData, token) => {
     setLoading(true);
     try {
       // Create appointment
@@ -219,7 +265,7 @@ const BookingForm = ({
           doctorSlotId: selectedSlot.id,
           patientNotes: formData.message || null,
         },
-        { Authorization: `Bearer ${accessToken}` }
+        { Authorization: `Bearer ${token}` }
       );
 
       if (!appointmentRes?.data?.id) {
@@ -232,7 +278,7 @@ const BookingForm = ({
       const paymentRes = await postData(
         `appointments/${appointmentRes.data.id}/payment`,
         {},
-        { Authorization: `Bearer ${accessToken}` }
+        { Authorization: `Bearer ${token}` }
       );
 
       if (!paymentRes?.data?.clientSecret) {
@@ -250,6 +296,53 @@ const BookingForm = ({
       addToast(error.message || "Failed to create booking. Please try again.", "error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Verify OTP for guest users
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length < 4) {
+      addToast("Please enter a valid OTP", "error");
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const verifyRes = await postData("user/verify-otp", { otp });
+
+      if (verifyRes?.status === "error" || !verifyRes?.data?.accessToken) {
+        throw new Error(verifyRes?.message || "Invalid OTP");
+      }
+
+      // Save the token and proceed with appointment creation
+      const token = verifyRes.data.accessToken;
+      setGuestToken(token);
+      addToast("OTP verified successfully!", "success");
+
+      // Create appointment with the new token
+      await createAppointment(guestFormData, token);
+    } catch (error) {
+      console.error("OTP verification failed:", error);
+      addToast(error.message || "Invalid OTP. Please try again.", "error");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // Resend OTP
+  const handleResendOtp = async () => {
+    if (!guestFormData?.email) return;
+
+    setOtpLoading(true);
+    try {
+      await postData("user/resend-otp", {
+        email: guestFormData.email,
+      });
+      addToast("OTP resent to your email", "success");
+    } catch (error) {
+      addToast("Failed to resend OTP", "error");
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -415,16 +508,28 @@ const BookingForm = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Name */}
+        {/* First Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Name*</label>
+          <label className="block text-sm font-medium text-gray-700">First Name*</label>
           <input
             type="text"
-            placeholder="Enter your Name"
+            placeholder="Enter your First Name"
             className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:primary"
             {...register("name")}
           />
           <p className="text-red-500 text-sm">{errors.name?.message}</p>
+        </div>
+
+        {/* Last Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Last Name*</label>
+          <input
+            type="text"
+            placeholder="Enter your Last Name"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-sm shadow-sm focus:ring-2 focus:primary"
+            {...register("lastName")}
+          />
+          <p className="text-red-500 text-sm">{errors.lastName?.message}</p>
         </div>
 
         {/* Email - Only show if not logged in */}
@@ -621,7 +726,7 @@ const BookingForm = ({
 
       {/* Submit */}
       <div className="flex items-center gap-5">
-        <FormButton additionalClass="w-full" disabled={loading || !selectedSlot || !accessToken || isSubmitting}>
+        <FormButton additionalClass="w-full" disabled={loading || !selectedSlot || isSubmitting}>
           {loading ? "Processing..." : "Book An Appointment"}
         </FormButton>
         {(loading || isSubmitting) && (
@@ -644,10 +749,85 @@ const BookingForm = ({
         )}
       </div>
 
-      {!accessToken && (
-        <p className="text-sm text-center text-red-500">
-          Please <a href="/login" className="text-primary hover:underline font-medium">log in</a> to book an appointment.
+      {!isLoggedIn && (
+        <p className="text-sm text-center text-gray-500">
+          You will receive an OTP on your email to verify your identity.
         </p>
+      )}
+
+      {/* OTP Verification Modal */}
+      {step === "otp" && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full overflow-hidden shadow-xl">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Verify Your Email</h3>
+                  <p className="text-xs text-gray-500">Enter the code sent to your email</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("select");
+                  setOtp("");
+                  setGuestFormData(null);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-full transition"
+              >
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <p className="text-sm text-gray-600 text-center mb-4">
+                We've sent a verification code to <strong>{guestFormData?.email}</strong>
+              </p>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">Enter OTP</label>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="Enter 6-digit OTP"
+                  className="block w-full p-4 text-center text-2xl tracking-widest border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-primary"
+                  maxLength={6}
+                  autoFocus
+                />
+              </div>
+
+              <FormButton
+                additionalClass="w-full"
+                onClick={handleVerifyOtp}
+                disabled={otpLoading || otp.length < 4}
+              >
+                {otpLoading ? "Verifying..." : "Verify & Continue"}
+              </FormButton>
+
+              <div className="text-center mt-4">
+                <p className="text-sm text-gray-500 mb-1">Didn't receive the code?</p>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={otpLoading}
+                  className="text-sm text-primary hover:underline disabled:opacity-50"
+                >
+                  Resend OTP
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </form>
   );

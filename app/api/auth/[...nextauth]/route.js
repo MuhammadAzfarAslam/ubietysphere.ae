@@ -33,7 +33,9 @@ export const authOptions = {
           return {
             id: user.id,
             name: user.name,
+            lastName: user.lastName,
             email: user.email,
+            mobileNumber: user.mobileNumber,
             role: user.role, // "Doctor", "Patient", etc.
             accessToken: user.accessToken, // your backend JWT
             disciplines: user.disciplines || [],
@@ -65,6 +67,8 @@ export const authOptions = {
       
       // Handle session update from client (e.g. after profile save)
       if (trigger === "update" && updateData) {
+        if (updateData.lastName !== undefined) token.lastName = updateData.lastName;
+        if (updateData.mobileNumber !== undefined) token.mobileNumber = updateData.mobileNumber;
         if (updateData.disciplines) token.disciplines = updateData.disciplines;
         if (updateData.services) token.services = updateData.services;
       }
@@ -72,6 +76,8 @@ export const authOptions = {
       if (user) {
         token.accessToken = user.accessToken; // copy to token
         token.role = user.role;
+        token.lastName = user.lastName;
+        token.mobileNumber = user.mobileNumber;
         token.disciplines = user.disciplines;
         token.services = user.services;
 
@@ -128,6 +134,8 @@ export const authOptions = {
       session.accessToken = token.accessToken; // expose in session
       session.user.role = token.role; // add role to user object
       session.user.id = token.sub;
+      session.user.lastName = token.lastName;
+      session.user.mobileNumber = token.mobileNumber;
       session.user.disciplines = token.disciplines || [];
       session.user.services = token.services || [];
       return session;
