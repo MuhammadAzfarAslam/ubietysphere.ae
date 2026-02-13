@@ -41,7 +41,8 @@ const getStatusBadge = (status) => {
     COMPLETED: "bg-blue-100 text-blue-800 border-blue-200",
     Cancelled: "bg-red-100 text-red-800 border-red-200",
     CANCELLED: "bg-red-100 text-red-800 border-red-200",
-    "No-Show": "bg-gray-100 text-gray-800 border-gray-200",
+    "No-Show": "bg-orange-100 text-orange-800 border-orange-200",
+    NO_SHOW: "bg-orange-100 text-orange-800 border-orange-200",
   };
   return badges[status] || "bg-gray-100 text-gray-800 border-gray-200";
 };
@@ -142,6 +143,22 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
+  const [cancellationResult, setCancellationResult] = useState(null);
+
+  // Reschedule appointment state
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [appointmentToReschedule, setAppointmentToReschedule] = useState(null);
+  const [rescheduleReason, setRescheduleReason] = useState("");
+  const [rescheduling, setRescheduling] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState({});
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [selectedRescheduleDate, setSelectedRescheduleDate] = useState("");
+  const [selectedRescheduleSlot, setSelectedRescheduleSlot] = useState(null);
+
+  // Doctor notes state (for doctors only)
+  const [editingNotesFor, setEditingNotesFor] = useState(null);
+  const [doctorNotesInput, setDoctorNotesInput] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
 
   // Fetch appointments with status filter and pagination
   const fetchAppointments = useCallback(async (status, page = 0) => {
@@ -311,22 +328,197 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
 
     setCancelling(true);
     try {
-      await postData(
+      const response = await postData(
         `appointments/${appointmentToCancel.id}/cancel`,
         { cancellationReason: cancelReason || null },
         { Authorization: `Bearer ${accessToken}` },
         "PUT"
       );
-      addToast("Appointment cancelled successfully", "success");
-      setShowCancelModal(false);
-      setAppointmentToCancel(null);
-      setCancelReason("");
-      handleRefresh();
+      // Check if response contains refund information
+      if (response?.data?.refundAmount !== undefined || response?.data?.refundPercentage !== undefined) {
+        setCancellationResult({
+          refundAmount: response.data.refundAmount,
+          refundPercentage: response.data.refundPercentage,
+          stripeRefundId: response.data.stripeRefundId,
+        });
+      } else {
+        addToast("Appointment cancelled successfully", "success");
+        setShowCancelModal(false);
+        setAppointmentToCancel(null);
+        setCancelReason("");
+        handleRefresh();
+      }
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
       addToast("Failed to cancel appointment", "error");
     } finally {
       setCancelling(false);
+    }
+  };
+
+  // Close cancel modal with refund result
+  const closeCancelModal = () => {
+    setShowCancelModal(false);
+    setAppointmentToCancel(null);
+    setCancelReason("");
+    setCancellationResult(null);
+    handleRefresh();
+  };
+
+  // Fetch available slots for rescheduling
+  const fetchAvailableSlotsForDoctor = async (doctorId, serviceSlug) => {
+    if (!accessToken || !doctorId || !serviceSlug) return;
+    setSlotsLoading(true);
+    try {
+      const response = await getData(
+        `doctor/slots/available?doctorId=${doctorId}&serviceSlug=${serviceSlug}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      // Response is already grouped by date, filter only Available slots
+      const slotsByDate = {};
+      const data = response?.data || {};
+      Object.keys(data).forEach((date) => {
+        const availableSlots = (data[date] || []).filter((slot) => slot.status === "Available");
+        if (availableSlots.length > 0) {
+          slotsByDate[date] = availableSlots;
+        }
+      });
+      setAvailableSlots(slotsByDate);
+    } catch (error) {
+      console.error("Failed to fetch available slots:", error);
+      addToast("Failed to load available slots", "error");
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  // Open reschedule modal
+  const openRescheduleModal = (appointment) => {
+    setAppointmentToReschedule(appointment);
+    setRescheduleReason("");
+    setSelectedRescheduleDate("");
+    setSelectedRescheduleSlot(null);
+    setShowRescheduleModal(true);
+    // Fetch available slots for this doctor and service
+    fetchAvailableSlotsForDoctor(appointment.doctor?.id, appointment.serviceSlug);
+  };
+
+  // Calculate hours until appointment
+  const getHoursUntilAppointment = (appointment) => {
+    const now = new Date();
+    const appointmentDateTime = new Date(`${appointment.appointmentDate}T${appointment.startTime}`);
+    return (appointmentDateTime - now) / (1000 * 60 * 60);
+  };
+
+  // Get reschedule penalty info
+  const getReschedulePenaltyInfo = (appointment) => {
+    const hours = getHoursUntilAppointment(appointment);
+    if (hours < 4) {
+      return { allowed: false, percentage: 0, message: "Cannot reschedule within 4 hours. Please cancel instead." };
+    } else if (hours < 24) {
+      return { allowed: true, percentage: 50, message: "50% penalty fee applies for rescheduling within 24 hours." };
+    }
+    return { allowed: true, percentage: 0, message: "No penalty fee - rescheduling 24+ hours in advance." };
+  };
+
+  // Get cancellation refund info
+  const getCancellationRefundInfo = (appointment) => {
+    const hours = getHoursUntilAppointment(appointment);
+    const amount = appointment.amount || 0;
+
+    if (hours >= 48) {
+      return {
+        refundPercentage: 100,
+        refundAmount: amount,
+        deductionAmount: 0,
+        message: "Full refund - cancelling 48+ hours in advance",
+        color: "green"
+      };
+    } else if (hours >= 24) {
+      return {
+        refundPercentage: 50,
+        refundAmount: amount * 0.5,
+        deductionAmount: amount * 0.5,
+        message: "50% refund - cancelling 24-48 hours before appointment",
+        color: "amber"
+      };
+    }
+    return {
+      refundPercentage: 0,
+      refundAmount: 0,
+      deductionAmount: amount,
+      message: "No refund - cancelling less than 24 hours before appointment",
+      color: "red"
+    };
+  };
+
+  // Handle reschedule
+  const handleReschedule = async () => {
+    if (!appointmentToReschedule || !selectedRescheduleSlot) {
+      addToast("Please select a new time slot", "error");
+      return;
+    }
+
+    const penalty = getReschedulePenaltyInfo(appointmentToReschedule);
+    if (!penalty.allowed) {
+      addToast(penalty.message, "error");
+      return;
+    }
+
+    setRescheduling(true);
+    try {
+      const response = await postData(
+        `appointments/${appointmentToReschedule.id}/reschedule`,
+        {
+          appointmentId: appointmentToReschedule.id,
+          newSlotId: selectedRescheduleSlot.id,
+          reason: rescheduleReason || "Schedule change",
+        },
+        { Authorization: `Bearer ${accessToken}` },
+        "PUT"
+      );
+
+      // Check if penalty payment is required
+      if (response?.data?.penaltyPayment?.required) {
+        // TODO: Handle penalty payment flow with Stripe
+        addToast("Penalty payment required. Please complete payment to confirm reschedule.", "warning");
+      } else {
+        addToast("Appointment rescheduled successfully!", "success");
+        setShowRescheduleModal(false);
+        setAppointmentToReschedule(null);
+        setSelectedRescheduleSlot(null);
+        handleRefresh();
+      }
+    } catch (error) {
+      console.error("Failed to reschedule:", error);
+      addToast(error.message || "Failed to reschedule appointment", "error");
+    } finally {
+      setRescheduling(false);
+    }
+  };
+
+  // Save doctor notes
+  const handleSaveDoctorNotes = async (appointmentId, currentPatientNotes) => {
+    setSavingNotes(true);
+    try {
+      await postData(
+        `appointments/${appointmentId}/doctor-notes`,
+        {
+          doctorNotes: doctorNotesInput,
+          patientNotes: currentPatientNotes || ""
+        },
+        { Authorization: `Bearer ${accessToken}` },
+        "PATCH"
+      );
+      addToast("Notes saved successfully", "success");
+      setEditingNotesFor(null);
+      setDoctorNotesInput("");
+      handleRefresh();
+    } catch (error) {
+      console.error("Failed to save notes:", error);
+      addToast("Failed to save notes", "error");
+    } finally {
+      setSavingNotes(false);
     }
   };
 
@@ -480,11 +672,68 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
                       </div>
                     )}
 
-                    {/* Doctor Notes */}
-                    {appointment.doctorNotes && (
+                    {/* Doctor Notes (display for patients) */}
+                    {appointment.doctorNotes && !isDoctor && (
                       <div className="mt-3 p-3 bg-blue-50 rounded-md">
                         <p className="text-xs text-blue-600 mb-1">Doctor's Notes</p>
                         <p className="text-sm text-gray-700">{appointment.doctorNotes}</p>
+                      </div>
+                    )}
+
+                    {/* Doctor Notes Edit (for doctors) */}
+                    {isDoctor && (
+                      <div className="mt-3 p-3 bg-blue-50 rounded-md">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs text-blue-600 font-medium">Doctor's Notes</p>
+                          {editingNotesFor !== appointment.id && (
+                            <button
+                              onClick={() => {
+                                setEditingNotesFor(appointment.id);
+                                setDoctorNotesInput(appointment.doctorNotes || "");
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              {appointment.doctorNotes ? "Edit" : "Add Notes"}
+                            </button>
+                          )}
+                        </div>
+                        {editingNotesFor === appointment.id ? (
+                          <div className="space-y-2">
+                            <textarea
+                              value={doctorNotesInput}
+                              onChange={(e) => setDoctorNotesInput(e.target.value)}
+                              placeholder="Add notes about this consultation..."
+                              rows={3}
+                              className="w-full px-3 py-2 text-sm border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white"
+                            />
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingNotesFor(null);
+                                  setDoctorNotesInput("");
+                                }}
+                                disabled={savingNotes}
+                                className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition disabled:opacity-50"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleSaveDoctorNotes(appointment.id, appointment.patientNotes)}
+                                disabled={savingNotes}
+                                className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+                              >
+                                {savingNotes ? "Saving..." : "Save Notes"}
+                              </button>
+                            </div>
+                          </div>
+                        ) : appointment.doctorNotes ? (
+                          <p className="text-sm text-gray-700">{appointment.doctorNotes}</p>
+                        ) : (
+                          <p className="text-sm text-gray-400 italic">No notes added yet</p>
+                        )}
                       </div>
                     )}
 
@@ -575,17 +824,31 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
                       </button>
                     )}
 
-                    {/* Cancel Appointment Button - Only for CONFIRMED appointments */}
+                    {/* Reschedule & Cancel - Only for CONFIRMED appointments */}
                     {appointment.status?.toUpperCase() === "CONFIRMED" && (
-                      <button
-                        onClick={() => openCancelModal(appointment)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-red-50 text-red-700 hover:bg-red-100 transition"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        Cancel
-                      </button>
+                      <>
+                        {/* Reschedule Button */}
+                        <button
+                          onClick={() => openRescheduleModal(appointment)}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Reschedule
+                        </button>
+
+                        {/* Cancel Button */}
+                        <button
+                          onClick={() => openCancelModal(appointment)}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-red-50 text-red-700 hover:bg-red-100 transition"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Cancel
+                        </button>
+                      </>
                     )}
 
                     {/* Appointment ID */}
@@ -648,7 +911,7 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
 
       {/* Document Attachment Modal */}
       {showDocumentModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] p-4">
           <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
@@ -766,72 +1029,349 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
 
       {/* Cancel Appointment Modal */}
       {showCancelModal && appointmentToCancel && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] p-4">
           <div className="bg-white rounded-lg max-w-md w-full overflow-hidden">
+            {/* Show Refund Result */}
+            {cancellationResult ? (
+              <>
+                <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Appointment Cancelled</h3>
+                      <p className="text-sm text-gray-600">Your refund is being processed</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-green-600 mb-2">
+                      {appointmentToCancel.currency || "AED"} {cancellationResult.refundAmount?.toFixed(2) || "0.00"}
+                    </p>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {cancellationResult.refundPercentage}% refund
+                    </p>
+                    <div className="bg-blue-50 rounded-lg p-4 text-left">
+                      <p className="text-sm text-blue-800 font-medium mb-1">Refund Timeline</p>
+                      <p className="text-sm text-blue-700">
+                        Your refund will be processed within 7-14 business days to your original payment method.
+                      </p>
+                      {cancellationResult.stripeRefundId && (
+                        <p className="text-xs text-blue-600 mt-2">
+                          Refund ID: {cancellationResult.stripeRefundId}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                  <button
+                    onClick={closeCancelModal}
+                    className="w-full px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-light transition"
+                  >
+                    Done
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Modal Header */}
+                <div className="px-6 py-4 border-b border-gray-200 bg-red-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Cancel Appointment</h3>
+                      <p className="text-sm text-gray-600">This action cannot be undone</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6">
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Appointment Details</p>
+                    <p className="font-medium text-gray-900">{appointmentToCancel.serviceTitle}</p>
+                    <p className="text-sm text-gray-600">
+                      {isDoctor
+                        ? `Patient: ${appointmentToCancel.patient?.name || appointmentToCancel.patientName || "N/A"}`
+                        : `Dr. ${appointmentToCancel.doctor?.name}`
+                      } • {formatDate(appointmentToCancel.appointmentDate)}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {formatTime(appointmentToCancel.startTime)} - {formatTime(appointmentToCancel.endTime)}
+                    </p>
+                  </div>
+
+                  {/* Refund Preview - Only show for patients, not doctors */}
+                  {!isDoctor && (() => {
+                    const refundInfo = getCancellationRefundInfo(appointmentToCancel);
+                    const colorClasses = {
+                      green: "bg-green-50 border-green-200 text-green-800",
+                      amber: "bg-amber-50 border-amber-200 text-amber-800",
+                      red: "bg-red-50 border-red-200 text-red-800"
+                    };
+                    return (
+                      <div className={`mb-4 p-4 rounded-lg border ${colorClasses[refundInfo.color]}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="font-medium">Refund Estimate</p>
+                          <span className="text-lg font-bold">
+                            {appointmentToCancel.currency || "AED"} {refundInfo.refundAmount.toFixed(2)}
+                          </span>
+                        </div>
+                        <p className="text-sm opacity-90">{refundInfo.message}</p>
+                        {refundInfo.deductionAmount > 0 && (
+                          <p className="text-xs mt-2 opacity-75">
+                            Deduction: {appointmentToCancel.currency || "AED"} {refundInfo.deductionAmount.toFixed(2)} ({100 - refundInfo.refundPercentage}%)
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Reason for cancellation (optional)
+                    </label>
+                    <textarea
+                      value={cancelReason}
+                      onChange={(e) => setCancelReason(e.target.value)}
+                      placeholder="Let us know why you're cancelling..."
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50">
+                  <button
+                    onClick={closeCancelModal}
+                    disabled={cancelling}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition disabled:opacity-50"
+                  >
+                    Keep Appointment
+                  </button>
+                  <button
+                    onClick={handleCancelAppointment}
+                    disabled={cancelling}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition disabled:opacity-50"
+                  >
+                    {cancelling ? "Cancelling..." : "Cancel Appointment"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Appointment Modal */}
+      {showRescheduleModal && appointmentToReschedule && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-red-50">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Reschedule Appointment</h3>
+                    <p className="text-sm text-gray-600">Select a new date and time</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowRescheduleModal(false);
+                    setAppointmentToReschedule(null);
+                    setSelectedRescheduleDate("");
+                    setSelectedRescheduleSlot(null);
+                    setRescheduleReason("");
+                  }}
+                  className="p-2 hover:bg-blue-100 rounded-full transition"
+                >
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Cancel Appointment</h3>
-                  <p className="text-sm text-gray-600">This action cannot be undone</p>
-                </div>
+                </button>
               </div>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6">
+            <div className="flex-1 overflow-y-auto p-6">
+              {/* Current Appointment Info */}
               <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">Appointment Details</p>
-                <p className="font-medium text-gray-900">{appointmentToCancel.serviceTitle}</p>
+                <p className="text-sm text-gray-600 mb-1">Current Appointment</p>
+                <p className="font-medium text-gray-900">{appointmentToReschedule.serviceTitle}</p>
                 <p className="text-sm text-gray-600">
-                  {isDoctor
-                    ? `Patient: ${appointmentToCancel.patient?.name || appointmentToCancel.patientName || "N/A"}`
-                    : `Dr. ${appointmentToCancel.doctor?.name}`
-                  } • {formatDate(appointmentToCancel.appointmentDate)}
+                  Dr. {appointmentToReschedule.doctor?.name} • {formatDate(appointmentToReschedule.appointmentDate)}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {formatTime(appointmentToCancel.startTime)} - {formatTime(appointmentToCancel.endTime)}
+                  {formatTime(appointmentToReschedule.startTime)} - {formatTime(appointmentToReschedule.endTime)}
                 </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Reason for cancellation (optional)
-                </label>
-                <textarea
-                  value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  placeholder="Let us know why you're cancelling..."
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
-                />
-              </div>
+              {/* Penalty Warning */}
+              {(() => {
+                const penalty = getReschedulePenaltyInfo(appointmentToReschedule);
+                if (!penalty.allowed) {
+                  return (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                          <p className="font-medium text-red-800">Cannot Reschedule</p>
+                          <p className="text-sm text-red-700">{penalty.message}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                } else if (penalty.percentage > 0) {
+                  return (
+                    <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                          <p className="font-medium text-amber-800">Penalty Fee Applies</p>
+                          <p className="text-sm text-amber-700">{penalty.message}</p>
+                          <p className="text-sm text-amber-700 mt-1">
+                            Estimated fee: {appointmentToReschedule.currency || "AED"} {((appointmentToReschedule.amount || 0) * penalty.percentage / 100).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <div>
+                          <p className="font-medium text-green-800">Free Rescheduling</p>
+                          <p className="text-sm text-green-700">{penalty.message}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              })()}
+
+              {/* Slots Loading */}
+              {slotsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : Object.keys(availableSlots).length === 0 ? (
+                <div className="text-center py-8">
+                  <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-gray-500 mb-2">No available slots found</p>
+                  <p className="text-sm text-gray-400">The doctor has no available slots for rescheduling</p>
+                </div>
+              ) : (
+                <>
+                  {/* Date Selection */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Select New Date</label>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.keys(availableSlots).sort().slice(0, 14).map((date) => (
+                        <button
+                          key={date}
+                          onClick={() => {
+                            setSelectedRescheduleDate(date);
+                            setSelectedRescheduleSlot(null);
+                          }}
+                          className={`px-3 py-2 text-sm rounded-lg border transition ${
+                            selectedRescheduleDate === date
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-primary hover:bg-primary/5"
+                          }`}
+                        >
+                          {new Date(date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Time Slot Selection */}
+                  {selectedRescheduleDate && availableSlots[selectedRescheduleDate] && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Select New Time</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {availableSlots[selectedRescheduleDate].map((slot) => (
+                          <button
+                            key={slot.id}
+                            onClick={() => setSelectedRescheduleSlot(slot)}
+                            className={`px-3 py-2 text-sm rounded-lg border transition ${
+                              selectedRescheduleSlot?.id === slot.id
+                                ? "bg-primary text-white border-primary"
+                                : "bg-white text-gray-700 border-gray-300 hover:border-primary hover:bg-primary/5"
+                            }`}
+                          >
+                            {formatTime(slot.startTime)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reason Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Reason for rescheduling
+                    </label>
+                    <textarea
+                      value={rescheduleReason}
+                      onChange={(e) => setRescheduleReason(e.target.value)}
+                      placeholder="Let us know why you're rescheduling..."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50">
               <button
                 onClick={() => {
-                  setShowCancelModal(false);
-                  setAppointmentToCancel(null);
-                  setCancelReason("");
+                  setShowRescheduleModal(false);
+                  setAppointmentToReschedule(null);
+                  setSelectedRescheduleDate("");
+                  setSelectedRescheduleSlot(null);
+                  setRescheduleReason("");
+                  setPenaltyInfo(null);
                 }}
-                disabled={cancelling}
+                disabled={rescheduling}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition disabled:opacity-50"
               >
-                Keep Appointment
+                Cancel
               </button>
               <button
-                onClick={handleCancelAppointment}
-                disabled={cancelling}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition disabled:opacity-50"
+                onClick={handleReschedule}
+                disabled={rescheduling || !selectedRescheduleSlot || !getReschedulePenaltyInfo(appointmentToReschedule).allowed}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-light transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {cancelling ? "Cancelling..." : "Cancel Appointment"}
+                {rescheduling ? "Rescheduling..." : "Confirm Reschedule"}
               </button>
             </div>
           </div>
