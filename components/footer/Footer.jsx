@@ -47,7 +47,7 @@ const Footer = () => {
               <ListItem link="/join-our-hcp">Join Our HCP Panel</ListItem>
               <ListItem link="/services">Services</ListItem>
               <ListItem link="/contact">Contact Us</ListItem>
-              <ListItem link="/privacy">Privacy Policy</ListItem>
+              <ListItem link="/terms">Terms & Conditions</ListItem>
             </ul>
           </div>
 
