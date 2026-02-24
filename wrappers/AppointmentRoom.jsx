@@ -536,6 +536,27 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
     return now >= joinableFrom && now <= endDateTime;
   };
 
+  const getMeetingTooltip = (appointment) => {
+    const now = new Date();
+    const appointmentDateTime = new Date(`${appointment.appointmentDate}T${appointment.startTime}`);
+    const endDateTime = new Date(`${appointment.appointmentDate}T${appointment.endTime}`);
+    const joinableFrom = new Date(appointmentDateTime.getTime() - 15 * 60 * 1000);
+
+    if (now < joinableFrom) {
+      const joinDateTime = joinableFrom.toLocaleString([], {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      return `You can join 15 minutes before the appointment. Join available at ${joinDateTime}`;
+    }
+    if (now > endDateTime) {
+      return "This appointment has ended";
+    }
+    return "Click to join the meeting";
+  };
+
   if (loading && appointments.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -794,21 +815,29 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
 
                     {/* Join Meeting Button */}
                     {appointment.googleMeetLink && appointment.status?.toUpperCase() === "CONFIRMED" && (
-                      <a
-                        href={appointment.googleMeetLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition ${
-                          canJoinMeeting(appointment)
-                            ? "bg-green-600 text-white hover:bg-green-700"
-                            : "bg-gray-100 text-gray-500 cursor-not-allowed"
-                        }`}
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        {canJoinMeeting(appointment) ? "Join Meeting" : "Meeting Link"}
-                      </a>
+                      <div className="relative group">
+                        <a
+                          href={canJoinMeeting(appointment) ? appointment.googleMeetLink : undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => !canJoinMeeting(appointment) && e.preventDefault()}
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition ${
+                            canJoinMeeting(appointment)
+                              ? "bg-green-600 text-white hover:bg-green-700"
+                              : "bg-gray-100 text-gray-500 cursor-not-allowed"
+                          }`}
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          {canJoinMeeting(appointment) ? "Join Meeting" : "Meeting Link"}
+                        </a>
+                        {/* Tooltip */}
+                        <div className="absolute top-full right-0 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none w-56 text-center z-10">
+                          {getMeetingTooltip(appointment)}
+                          <div className="absolute bottom-full right-4 border-4 border-transparent border-b-gray-900"></div>
+                        </div>
+                      </div>
                     )}
 
                     {/* Attach Documents Button - Only for patients/parents, not for doctors */}

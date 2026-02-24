@@ -550,11 +550,11 @@ const Slots = ({ accessToken, services = [] }) => {
                       >
                         + Add
                       </button>
-                      {daySlots.length > 0 && (
+                      {daySlots.length > 0 && !daySlots.some((slot) => slot.status?.toLowerCase() === "booked") && (
                         <button
                           onClick={() => handleDeleteDaySlots(dateKey)}
                           className="py-1 px-1.5 text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
-                          title="Clear all slots for this day"
+                          title="Clear available slots for this day"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -564,26 +564,40 @@ const Slots = ({ accessToken, services = [] }) => {
                     </div>
 
                     <div className="space-y-1">
-                      {daySlots.map((slot) => (
-                        <div
-                          key={slot.id}
-                          className={`p-2 rounded border text-xs ${getServiceColor(slot.service)} group relative`}
-                        >
-                          <div className="font-medium">
-                            {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                          </div>
-                          <div className="truncate">{slot.serviceTitle}</div>
-                          <div className="text-[10px] opacity-70">{slot.duration} min</div>
-                          <button
-                            onClick={() => handleDeleteSlot(dateKey, slot.id)}
-                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-1 hover:bg-red-200 rounded transition"
+                      {daySlots.map((slot) => {
+                        const isBooked = slot.status?.toLowerCase() === "booked";
+                        return (
+                          <div
+                            key={slot.id}
+                            className={`p-2 rounded border text-xs group relative ${
+                              isBooked
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                : getServiceColor(slot.service)
+                            }`}
                           >
-                            <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
+                            {isBooked && (
+                              <span className="absolute top-1 right-1 px-1.5 py-0.5 bg-emerald-600 text-white text-[9px] font-medium rounded">
+                                Booked
+                              </span>
+                            )}
+                            <div className="font-medium">
+                              {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                            </div>
+                            <div className="truncate">{slot.serviceTitle}</div>
+                            <div className="text-[10px] opacity-70">{slot.duration} min</div>
+                            {!isBooked && (
+                              <button
+                                onClick={() => handleDeleteSlot(dateKey, slot.id)}
+                                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-1 hover:bg-red-200 rounded transition"
+                              >
+                                <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -642,15 +656,22 @@ const Slots = ({ accessToken, services = [] }) => {
                     </div>
 
                     <div className="space-y-0.5">
-                      {daySlots.slice(0, 3).map((slot) => (
-                        <div
-                          key={slot.id}
-                          className={`px-1 py-0.5 rounded text-[10px] truncate ${getServiceColor(slot.service)}`}
-                          title={`${slot.serviceTitle} - ${formatTime(slot.startTime)}`}
-                        >
-                          {formatTime(slot.startTime)}
-                        </div>
-                      ))}
+                      {daySlots.slice(0, 3).map((slot) => {
+                        const isBooked = slot.status?.toLowerCase() === "booked";
+                        return (
+                          <div
+                            key={slot.id}
+                            className={`px-1 py-0.5 rounded text-[10px] truncate ${
+                              isBooked
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                : getServiceColor(slot.service)
+                            }`}
+                            title={`${slot.serviceTitle} - ${formatTime(slot.startTime)}${isBooked ? " (Booked)" : ""}`}
+                          >
+                            {formatTime(slot.startTime)} {isBooked && "✓"}
+                          </div>
+                        );
+                      })}
                       {daySlots.length > 3 && (
                         <div className="text-[10px] text-gray-500 text-center">
                           +{daySlots.length - 3} more
