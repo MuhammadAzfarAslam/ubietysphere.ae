@@ -856,16 +856,18 @@ const AppointmentRoom = ({ accessToken, userRole }) => {
                     {/* Reschedule & Cancel - Only for CONFIRMED appointments */}
                     {appointment.status?.toUpperCase() === "CONFIRMED" && (
                       <>
-                        {/* Reschedule Button */}
-                        <button
-                          onClick={() => openRescheduleModal(appointment)}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          Reschedule
-                        </button>
+                        {/* Reschedule Button - Only for patients/parents, not for doctors */}
+                        {!isDoctor && (
+                          <button
+                            onClick={() => openRescheduleModal(appointment)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Reschedule
+                          </button>
+                        )}
 
                         {/* Cancel Button */}
                         <button
