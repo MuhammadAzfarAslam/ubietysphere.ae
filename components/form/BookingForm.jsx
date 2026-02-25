@@ -25,7 +25,6 @@ const createSchema = (isLoggedIn) =>
       .string()
       .required("Phone number is required")
       .matches(/^[0-9]+$/, "Phone number must be digits only"),
-    file: yup.mixed(),
     message: yup.string().required("Message is required"),
   });
 
@@ -556,17 +555,6 @@ const BookingForm = ({
             {...register("phone")}
           />
           <p className="text-red-500 text-sm">{errors.phone?.message}</p>
-        </div>
-
-        {/* File Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Upload File</label>
-          <input
-            type="file"
-            className="mt-1 block w-full text-sm text-gray-700 px-3 py-3.5 border border-gray-300 rounded-sm shadow-sm"
-            {...register("file")}
-          />
-          <p className="text-red-500 text-sm">{errors.file?.message}</p>
         </div>
 
         {/* Doctor Dropdown (only if not pre-selected) */}
