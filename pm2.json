@@ -8,7 +8,7 @@
       "min_uptime": 10000,
       "restart_delay": 10000,
       "max_restarts": 10,
-      "max_memory_restart": "5G",
+      "max_memory_restart": "700M",
       "log_date_format": "YYYY-MM-DD HH:mm Z",
       "env_production": {
         "NODE_ENV": "production"
