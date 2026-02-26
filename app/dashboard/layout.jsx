@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ToastProvider } from "@/components/toaster/ToastContext";
 import { Providers } from "@/components/providers";
+import WelcomeWidget from "@/components/dashboard/WelcomeWidget";
 
 
 
@@ -66,6 +67,14 @@ const DashboardLayout = async ({ params, children }) => {
             <div className="lg:flex lg:space-x-8">
               <div className="left-sidebar lg:w-64 lg:flex-shrink-0 sticky top-0 p-4 bg-white lg:h-[calc(100vh-160px)] lg:min-h-[300px] shadow-md rounded-lg">
                 <nav className="flex flex-col h-full ">
+                  {/* Welcome Widget for Patient/Parent */}
+                  {["Patient", "Parent"].includes(session.user.role) && (
+                    <WelcomeWidget
+                      user={session.user}
+                      imageUrl={session.user.image ? `https://cms.ubietysphere.ae/img/user-images/${session.user.image}` : null}
+                    />
+                  )}
+
                   <ul className="lg:space-y-4 space-y-0.5 flex-1">
                     {sideMenu.map(
                       (item) =>

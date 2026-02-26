@@ -166,7 +166,7 @@ export default function Header() {
                   href="/dashboard"
                   className="hover:underline text-white text-xs hidden lg:block pr-4 border-r-1"
                 >
-                  {session?.user?.name}
+                  {session?.user?.name} {session?.user?.lastName}
                 </Link>
               ) : (
                 <Link
