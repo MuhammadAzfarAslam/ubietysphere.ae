@@ -1,7 +1,7 @@
 import GeneralForm from "@/components/form/GeneralForm";
 import getData from "@/utils/getData";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "../../api/auth/[...nextauth]/route";
 import GeneralProfile from "@/components/upload/GeneralProfile";
 import { redirect } from "next/navigation";
 import DoctorApplications from "@/wrappers/DoctorApplications";

@@ -1,6 +1,6 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "../../api/auth/[...nextauth]/route";
 import Logout from "@/components/button/Logout";
 import { redirect } from "next/navigation";
 import Link from "next/link";
